@@ -318,7 +318,7 @@ export default function WinnerModal({
             ) : winner.lives === 0 ? (
               <div>
                 <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '6px' }}>
-                  ✨ Infinite Legend!
+                  ✨ Unlimited option, it's here to stay!
                 </p>
                 <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
                   This option has unlimited lives and stays on the wheel forever!
