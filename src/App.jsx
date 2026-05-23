@@ -452,7 +452,7 @@ export default function App() {
   };
 
   const handleResetToDefaultWheels = () => {
-    if (confirm('This will restore the default wheel templates. Your existing wheels will be reset. Proceed?')) {
+    if (confirm('This will restore the default wheelspins. Your existing wheels will be reset. Proceed?')) {
       const defaults = getDefaultWheels();
       saveWheels(defaults);
       localStorage.setItem('wheelspin_wheels', JSON.stringify(defaults));
@@ -802,7 +802,7 @@ export default function App() {
         color: 'var(--color-text-muted)',
         fontSize: '0.85rem'
       }}>
-        KobSpin Wheelspin App © {new Date().getFullYear()} • Custom options & weight chances.
+        KobSpin © {new Date().getFullYear()} • AI Slop'd by yours truly • Heikob @twitch
       </footer>
 
     </div>

@@ -98,16 +98,32 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
   };
 
   return (
-    <div className="home-container animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
+    <div className="home-container animate-fade-in" style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px', position: 'relative' }}>
+      
+      {/* Dynamic Ambient Background Spotlight */}
+      <div style={{
+        position: 'absolute',
+        top: '0',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: '800px',
+        height: '380px',
+        background: 'radial-gradient(ellipse at center, rgba(139, 92, 246, 0.09) 0%, rgba(6, 182, 212, 0.02) 50%, transparent 80%)',
+        pointerEvents: 'none',
+        zIndex: -1
+      }} />
+
       <header style={{ textAlign: 'center', marginBottom: '60px' }}>
         <h1 style={{
-          fontSize: '3.5rem',
-          background: 'linear-gradient(135deg, #fff 0%, var(--color-text-muted) 100%)',
+          fontSize: '3.7rem',
+          background: 'linear-gradient(135deg, #ffffff 30%, #c084fc 80%, #8b5cf6 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '10px'
+          marginBottom: '12px',
+          letterSpacing: '-0.03em'
         }}>
-          KOB<span style={{ color: 'var(--color-accent)', textShadow: 'var(--shadow-neon-strong)' }}>SPIN</span>
+          KOB<span style={{ color: 'var(--color-accent)', textShadow: '0 0 25px rgba(139, 92, 246, 0.45)' }}>SPIN</span>
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', marginBottom: '20px' }}>
           Create custom wheels with nested, unlockable options and variable weights.
@@ -123,7 +139,7 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
               borderColor: 'rgba(139, 92, 246, 0.3)'
             }}
           >
-            🔄 Reset Templates to Default
+            🔄 Reset Wheelspins to Default
           </button>
         )}
       </header>
@@ -136,7 +152,7 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
         {/* Create Card */}
         <div 
           onClick={handleCreateNew}
-          className="glass-panel" 
+          className="glass-panel create-card" 
           style={{
             minHeight: '200px',
             display: 'flex',
@@ -158,10 +174,21 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--color-accent)',
-            fontSize: '2rem',
             boxShadow: 'inset 0 0 10px rgba(139, 92, 246, 0.2)'
           }}>
-            +
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
           </div>
           <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '600', color: 'var(--color-text-primary)' }}>
             Create a New Wheel
@@ -174,7 +201,7 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
           return (
             <div 
               key={wheel.id} 
-              className="glass-panel"
+              className="glass-panel wheel-card"
               style={{
                 minHeight: '200px',
                 padding: '24px',

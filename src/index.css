@@ -545,6 +545,33 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Homepage Wheel Cards interactive effects */
+.wheel-card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s !important;
+}
+.wheel-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.5), 0 0 22px rgba(139, 92, 246, 0.22) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.create-card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s, background 0.3s !important;
+}
+.create-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.5), 0 0 22px rgba(139, 92, 246, 0.18) !important;
+  border-color: var(--color-accent) !important;
+  background: rgba(139, 92, 246, 0.04) !important;
+}
+.create-card svg {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s;
+}
+.create-card:hover svg {
+  transform: scale(1.15) rotate(90deg);
+  color: #fff;
+}
+
 
 
 
