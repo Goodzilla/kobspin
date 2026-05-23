@@ -1061,7 +1061,8 @@ export default function WheelSpin({
     setWinnerModalOpen(false);
     
     // Check if the option is a link to another wheel
-    if (winner && winner.linkedWheelId) {
+    // If we are returning from a nested run (nestedResult is present), we DO NOT transition again!
+    if (!nestedResult && winner && winner.linkedWheelId) {
       console.log('[WHEEL] Confirming linked wheel transition to:', winner.linkedWheelId);
       onTransitionToWheel(winner.linkedWheelId, winner);
       return;

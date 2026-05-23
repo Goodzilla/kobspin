@@ -522,7 +522,7 @@ h1, h2, h3, h4, h5, h6 {
   background: radial-gradient(circle, #ffe359 10%, #ff8800 45%, #ef4444 80%, transparent 95%);
   border-radius: 50% 50% 20% 50%;
   transform: rotate(-45deg);
-  filter: blur(8px);
+  filter: blur(16px);
   mix-blend-mode: screen;
   animation: rise-flame 1.4s infinite ease-in;
   opacity: 0;
@@ -540,7 +540,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.65;
   }
   100% {
-    transform: translateY(-1100px) scale(2.2) rotate(15deg);
+    transform: translateY(-120vh) scale(2.2) rotate(15deg);
     opacity: 0;
   }
 }

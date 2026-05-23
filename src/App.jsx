@@ -662,10 +662,10 @@ export default function App() {
       <div className={`flames-container ${flamesActive ? 'active' : ''}`}>
         {Array.from({ length: 24 }).map((_, i) => {
           const isLeft = i % 2 === 0;
-          const offset = -90 + Math.random() * 80;
-          const delay = Math.random() * 1.2;
-          const duration = 0.8 + Math.random() * 0.7;
-          const size = 30 + Math.random() * 40;
+          const offset = -40 + Math.random() * 160;
+          const delay = Math.random() * 1.0;
+          const duration = 0.9 + Math.random() * 0.6;
+          const size = 120 + Math.random() * 140;
           return (
             <div 
               key={i} 
