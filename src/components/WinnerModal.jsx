@@ -1,0 +1,273 @@
+
+
+export default function WinnerModal({
+  isOpen,
+  winner,
+  isWinnerLegendary,
+  onConfirm
+}) {
+  if (!isOpen || !winner) return null;
+
+  const glowColor = isWinnerLegendary ? '#ffd700' : winner.color;
+  const borderColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.45)' : `${winner.color}66`;
+  const shadowColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.3)' : `${winner.color}33`;
+
+  // Precompute lives stagger heart arrays
+  const activeCount = Math.max(0, winner.currentLives - 1);
+  const inactiveCount = Math.max(0, winner.lives - activeCount);
+  const heartArray = [];
+  for (let i = 0; i < activeCount; i++) heartArray.push({ id: `active-${i}`, char: '❤️' });
+  for (let i = 0; i < inactiveCount; i++) heartArray.push({ id: `inactive-${i}`, char: '🖤' });
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(5, 3, 10, 0.82)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 100,
+      padding: '20px',
+      backdropFilter: 'blur(14px)',
+      WebkitBackdropFilter: 'blur(14px)'
+    }} className="animate-overlay">
+      
+      {/* Soft breathing background halo */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        width: '140%',
+        height: '140%',
+        background: `radial-gradient(circle, ${glowColor}25 0%, transparent 60%)`,
+        pointerEvents: 'none',
+        zIndex: 99,
+        animation: 'modalGlowPulse 6s ease-in-out infinite'
+      }} />
+
+      <div className="glass-panel animate-scale-in" style={{
+        maxWidth: '480px',
+        width: '100%',
+        padding: '44px 32px',
+        textAlign: 'center',
+        borderColor: borderColor,
+        boxShadow: `0 24px 60px rgba(0, 0, 0, 0.75), 0 0 45px ${shadowColor}`,
+        position: 'relative',
+        overflow: 'hidden',
+        zIndex: 100
+      }}>
+        
+        {/* Glowing gradient mesh backdrop inside card */}
+        <div style={{
+          position: 'absolute',
+          top: '-50%',
+          left: '-50%',
+          width: '200%',
+          height: '200%',
+          background: `radial-gradient(circle, ${glowColor}0d 0%, transparent 60%)`,
+          pointerEvents: 'none',
+          zIndex: 0
+        }} />
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {isWinnerLegendary && (
+            <div style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              color: '#ffd700',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              marginBottom: '16px',
+              textShadow: '0 0 10px rgba(255, 215, 0, 0.6)'
+            }}>
+              👑 Rare Option! 👑
+            </div>
+          )}
+
+          {/* Floating trophy badge with spin-slow outer ring */}
+          <div className="animate-float" style={{
+            position: 'relative',
+            width: '96px',
+            height: '96px',
+            margin: '0 auto 24px auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* Outer spin-slow outline */}
+            <div className="animate-spin-slow" style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              borderRadius: '50%',
+              border: `1.5px dashed ${glowColor}`,
+              opacity: 0.65
+            }} />
+            {/* Inner gold/winner colored badge */}
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${glowColor}33 0%, transparent 75%)`,
+              border: `2.5px solid ${glowColor}`,
+              boxShadow: `0 0 25px ${glowColor}55`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1
+            }}>
+              <span style={{ fontSize: '2.8rem', transform: 'translateY(-2px)' }}>
+                {isWinnerLegendary ? '👑' : '🏆'}
+              </span>
+            </div>
+          </div>
+
+          <p style={{
+            color: 'var(--color-text-secondary)',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '2.5px',
+            marginBottom: '10px'
+          }}>
+            Landed On!
+          </p>
+
+          {/* Pill Badge Container with dynamic borders */}
+          <div style={{
+            display: 'inline-block',
+            padding: '10px 32px',
+            borderRadius: '30px',
+            border: `1.5px solid ${borderColor}`,
+            background: `linear-gradient(135deg, ${glowColor}1c 0%, rgba(255, 255, 255, 0.04) 100%)`,
+            boxShadow: `inset 0 0 16px ${glowColor}1a`,
+            marginBottom: '32px'
+          }}>
+            {/* Premium gradient text with drop shadow wrapper */}
+            <div style={{ filter: `drop-shadow(0 4px 12px ${glowColor}33)` }}>
+              <h2 style={{
+                fontSize: '2.2rem',
+                fontWeight: 850,
+                background: `linear-gradient(to bottom, #ffffff 40%, ${isWinnerLegendary ? '#ffd700' : glowColor} 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                margin: 0,
+                lineHeight: '1.2'
+              }}>
+                {winner.name}
+              </h2>
+            </div>
+          </div>
+
+          {/* Lives status frosted glass slab */}
+          <div style={{
+            backgroundColor: 'rgba(10, 7, 22, 0.6)',
+            padding: '22px 18px',
+            borderRadius: '18px',
+            marginBottom: '32px',
+            border: '1px solid rgba(255, 255, 255, 0.04)',
+            borderTop: `1.2px solid ${glowColor}33`,
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.55)'
+          }}>
+            {winner.lives === 0 ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '6px' }}>
+                  ✨ Infinite Legend!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                  This option has unlimited lives and stays on the wheel forever!
+                </p>
+              </div>
+            ) : winner.currentLives > 1 ? (
+              <div>
+                <p style={{ fontSize: '1rem', color: 'var(--color-text-primary)', fontWeight: 500, marginBottom: '6px' }}>
+                  💔 That cost a life!
+                </p>
+                
+                {/* Bouncy staggered popping hearts */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  margin: '14px 0'
+                }}>
+                  {heartArray.map((heart, idx) => (
+                    <span 
+                      key={heart.id} 
+                      className="heart-pop"
+                      style={{
+                        fontSize: '1.8rem',
+                        animationDelay: `${idx * 0.12}s`,
+                        filter: heart.char === '❤️' 
+                          ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
+                          : 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.15))'
+                      }}
+                    >
+                      {heart.char}
+                    </span>
+                  ))}
+                </div>
+
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+                  ({winner.currentLives - 1} lives left)
+                </p>
+              </div>
+            ) : winner.subOption ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-warning)', fontWeight: 600, marginBottom: '8px' }}>
+                  💥 Out of Lives!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', marginBottom: '12px', lineHeight: 1.4 }}>
+                  "{winner.name}" has shattered and vanished from the wheel...
+                </p>
+                <p style={{ fontSize: '0.88rem', color: 'var(--color-success)', fontWeight: 600 }}>
+                  🔓 A hidden unlock is about to be revealed!
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-danger)', fontWeight: 600, marginBottom: '6px' }}>
+                  🚫 Out of Lives!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                  "{winner.name}" has shattered and completely vanished from the wheel!
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Glare Sheen Shiny CTA Button */}
+          <button 
+            onClick={onConfirm} 
+            className="btn btn-primary btn-sheen-container" 
+            style={{ 
+              width: '100%', 
+              padding: '16px',
+              fontSize: '1.1rem',
+              borderRadius: '14px',
+              background: isWinnerLegendary 
+                ? 'linear-gradient(135deg, #ffd700 0%, #f97316 100%)' 
+                : `linear-gradient(135deg, ${glowColor} 0%, #6366f1 100%)`,
+              boxShadow: `0 6px 24px ${glowColor}44`,
+              border: '1px solid rgba(255,255,255,0.2)',
+              fontWeight: 750,
+              letterSpacing: '0.5px',
+              transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
+            }}
+          >
+            Confirm & Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
