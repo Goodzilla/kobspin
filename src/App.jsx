@@ -15,7 +15,7 @@ const getDefaultWheels = () => [
     originalOptions: [
       {
         id: '5-opt-1',
-        name: 'Drink a full glass of water',
+        name: 'No coffee for 2 hours',
         weight: 40,
         lives: 0,
         currentLives: 0,
@@ -67,7 +67,7 @@ const getDefaultWheels = () => [
       },
       {
         id: '5-opt-link-10',
-        name: 'Link: 10 Gifted Subs Escalation',
+        name: '10 Gifted Subs Escalation',
         weight: 5,
         lives: 0,
         currentLives: 0,
@@ -77,7 +77,7 @@ const getDefaultWheels = () => [
       },
       {
         id: '5-opt-link-20',
-        name: 'Link: 20 Gifted Subs Mega Wheel',
+        name: '20 Gifted Subs Mega Wheel',
         weight: 1,
         lives: 0,
         currentLives: 0,
@@ -112,7 +112,7 @@ const getDefaultWheels = () => [
       },
       {
         id: '10-opt-2',
-        name: 'No hydration for the next 15 minutes',
+        name: 'No coffee for 4 hours',
         weight: 20,
         lives: 2,
         currentLives: 2,
@@ -148,8 +148,8 @@ const getDefaultWheels = () => [
       },
       {
         id: '10-opt-link-20',
-        name: 'Link: 20 Gifted Subs Mega Wheel',
-        weight: 8,
+        name: '20 Gifted Subs Mega Wheel',
+        weight: 3,
         lives: 0,
         currentLives: 0,
         color: getVibrantColor(6),
@@ -244,6 +244,7 @@ export default function App() {
   const [autoSpinActive, setAutoSpinActive] = useState(false);
   const [nestedResult, setNestedResult] = useState(null);
   const [flamesActive, setFlamesActive] = useState(false);
+  const [flameCount, setFlameCount] = useState(24);
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'wheel'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -320,6 +321,11 @@ export default function App() {
   const handleTransitionToWheel = (linkedWheelId, originOption) => {
     console.log('[APP] Transitioning to linked wheel:', linkedWheelId, 'from option:', originOption.name);
     
+    // Double flame count for each nested level (depth starts at 0 for first nested transition)
+    const depth = wheelStack.length;
+    const count = 24 * Math.pow(2, depth);
+    setFlameCount(count);
+    
     audio.playFlameWhoosh();
     setFlamesActive(true);
 
@@ -380,6 +386,11 @@ export default function App() {
     if (wheelStack.length > 0) {
       const topLevel = wheelStack[0];
       console.log('[APP] Nested run ended. Returning to top-level starting wheel with flames:', topLevel.wheelId);
+      
+      // Match the flame excitement level of the depth we returned from
+      const depth = wheelStack.length;
+      const count = 24 * Math.pow(2, depth);
+      setFlameCount(count);
       
       audio.playFlameWhoosh();
       setFlamesActive(true);
@@ -660,7 +671,7 @@ export default function App() {
       
       {/* Fullscreen Symmetrical Flames transition overlay */}
       <div className={`flames-container ${flamesActive ? 'active' : ''}`}>
-        {Array.from({ length: 24 }).map((_, i) => {
+        {Array.from({ length: flameCount }).map((_, i) => {
           const isLeft = i % 2 === 0;
           const offset = -40 + Math.random() * 160;
           const delay = Math.random() * 1.0;

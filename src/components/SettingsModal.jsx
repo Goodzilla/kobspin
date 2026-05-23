@@ -200,7 +200,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
                       const defaultTarget = otherWheels[0];
                       updateOption(opt.id, {
                         linkedWheelId: defaultTarget ? defaultTarget.id : '',
-                        name: opt.name.startsWith('Option') && defaultTarget ? `Link: ${defaultTarget.name}` : opt.name
+                        name: opt.name.startsWith('Option') && defaultTarget ? defaultTarget.name : opt.name
                       });
                     }
                   }}
@@ -222,7 +222,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
                       const targetWheel = wheels.find(w => w.id === targetId);
                       updateOption(opt.id, {
                         linkedWheelId: targetId,
-                        name: targetWheel ? `Link: ${targetWheel.name}` : opt.name
+                        name: targetWheel ? targetWheel.name : opt.name
                       });
                     }}
                     className="form-input"
