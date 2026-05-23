@@ -333,10 +333,26 @@ export default function WheelSpin({
       ctx.fillStyle = gradient;
       ctx.fill();
 
-      // Wedge separator lines
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = '#07050f';
-      ctx.stroke();
+      // Outer arc border line (only if not cracking/exploding to avoid outer border crack visuals)
+      if (!isCurrentlyCracking && !isCurrentlyExploding) {
+        ctx.beginPath();
+        ctx.arc(cx + shakeX, cy + shakeY, radius, start, end);
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#07050f';
+        ctx.stroke();
+      }
+
+      // Radial separator lines (only drawn for boundaries not touching a cracking/exploding slice)
+      const prevIdx = (idx - 1 + activeSegs.length) % activeSegs.length;
+      const isBoundaryDepleting = (depletionIndexRef.current === idx || depletionIndexRef.current === prevIdx) && depletionPhaseRef.current !== null;
+      if (!isBoundaryDepleting) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + radius * Math.cos(start), cy + radius * Math.sin(start));
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#07050f';
+        ctx.stroke();
+      }
 
       // Draw Option Label & Health LEDs
       ctx.save();
