@@ -22,7 +22,6 @@ export default function WheelSpin({
   const [winner, setWinner] = useState(null);
   const [winnerModalOpen, setWinnerModalOpen] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
-  const [flamesActive, setFlamesActive] = useState(false);
   
   // Animation state refs to avoid React re-render lag
   const angleRef = useRef(0); // Current rotation angle
@@ -138,25 +137,14 @@ export default function WheelSpin({
   useEffect(() => {
     if (autoSpin) {
       console.log('[WHEEL] Auto-spin triggered for:', wheel.name);
-      audio.playFlameWhoosh();
-      
-      const flameStartTimeout = setTimeout(() => {
-        setFlamesActive(true);
-      }, 0);
       
       const spinTimeout = setTimeout(() => {
         handleSpin();
         if (onClearAutoSpin) onClearAutoSpin();
       }, 350);
 
-      const flamesTimeout = setTimeout(() => {
-        setFlamesActive(false);
-      }, 1800);
-
       return () => {
-        clearTimeout(flameStartTimeout);
         clearTimeout(spinTimeout);
-        clearTimeout(flamesTimeout);
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -249,9 +237,10 @@ export default function WheelSpin({
 
   // Centralized Draw Function
   const drawWheel = (ctx, width, height, currentAngle) => {
+    const radius = Math.max(0, Math.min(width, height) / 2 - 20);
+    if (radius <= 0) return;
     const cx = width / 2;
     const cy = height / 2;
-    const radius = Math.min(width, height) / 2 - 20;
 
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -785,7 +774,7 @@ export default function WheelSpin({
           const rect = canvas.getBoundingClientRect();
           const cx = rect.width / 2;
           const cy = rect.height / 2;
-          const radius = Math.min(rect.width, rect.height) / 2 - 20;
+          const radius = Math.max(0, Math.min(rect.width, rect.height) / 2 - 20);
           const sparkCount = Math.floor(Math.abs(velocityRef.current) * 150);
           for (let i = 0; i < sparkCount; i++) {
             particlesRef.current.push({
@@ -854,7 +843,7 @@ export default function WheelSpin({
         const rect = canvasRef.current.getBoundingClientRect();
         const cx = rect.width / 2;
         const cy = rect.height / 2;
-        const radius = Math.min(rect.width, rect.height) / 2 - 20;
+        const radius = Math.max(0, Math.min(rect.width, rect.height) / 2 - 20);
         const seg = segmentsRef.current[depletionIndexRef.current];
 
         if (seg) {
@@ -1074,13 +1063,7 @@ export default function WheelSpin({
     // Check if the option is a link to another wheel
     if (winner && winner.linkedWheelId) {
       console.log('[WHEEL] Confirming linked wheel transition to:', winner.linkedWheelId);
-      audio.playFlameWhoosh();
-      setFlamesActive(true);
-      
-      setTimeout(() => {
-        setFlamesActive(false);
-        onTransitionToWheel(winner.linkedWheelId, winner.id);
-      }, 1500);
+      onTransitionToWheel(winner.linkedWheelId, winner);
       return;
     }
 
@@ -1166,31 +1149,6 @@ export default function WheelSpin({
           </h2>
 
           <div className="wheel-container">
-            {/* Flames background container */}
-            <div className={`flames-container ${flamesActive ? 'active' : ''}`}>
-              {Array.from({ length: 24 }).map((_, i) => {
-                const isLeft = i % 2 === 0;
-                const offset = -90 + Math.random() * 80;
-                const delay = Math.random() * 1.2;
-                const duration = 0.8 + Math.random() * 0.7;
-                const size = 30 + Math.random() * 40;
-                return (
-                  <div 
-                    key={i} 
-                    className="flame-particle" 
-                    style={{
-                      left: isLeft ? `${offset}px` : 'auto',
-                      right: !isLeft ? `${offset}px` : 'auto',
-                      animationDelay: `${delay}s`,
-                      animationDuration: `${duration}s`,
-                      width: `${size}px`,
-                      height: `${size}px`
-                    }}
-                  />
-                );
-              })}
-            </div>
-
             <canvas 
               ref={canvasRef} 
               style={{

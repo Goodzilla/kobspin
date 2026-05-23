@@ -230,6 +230,81 @@ export default function WinnerModal({
                     </p>
                   </div>
                 )}
+
+                {/* Vertical Nesting Rundown Timeline */}
+                {nestedResult.rundown && (
+                  <div style={{
+                    marginTop: '20px',
+                    textAlign: 'left',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: 'var(--color-text-secondary)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      marginBottom: '4px',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                      paddingBottom: '8px'
+                    }}>
+                      📜 Nesting Rundown
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative' }}>
+                      {/* Vertical connecting line */}
+                      <div style={{
+                        position: 'absolute',
+                        left: '9px',
+                        top: '10px',
+                        bottom: '10px',
+                        width: '2px',
+                        background: 'linear-gradient(to bottom, var(--color-accent) 0%, var(--color-info) 100%)',
+                        opacity: 0.5
+                      }} />
+                      {nestedResult.rundown.map((step, idx) => {
+                        const isLast = idx === nestedResult.rundown.length - 1;
+                        return (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', zIndex: 1 }}>
+                            <div style={{
+                              width: '20px',
+                              height: '20px',
+                              borderRadius: '50%',
+                              backgroundColor: isLast ? 'var(--color-success)' : 'var(--color-accent)',
+                              border: '2px solid var(--bg-secondary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.7rem',
+                              fontWeight: 800,
+                              color: '#fff',
+                              marginTop: '2px',
+                              boxShadow: isLast ? '0 0 8px var(--color-success)' : 'none'
+                            }}>
+                              {idx + 1}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                                {step.wheelName}
+                              </div>
+                              <div style={{ fontSize: '0.88rem', color: isLast ? 'var(--color-success)' : '#fff', fontWeight: isLast ? 700 : 500 }}>
+                                {step.optionName}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : winner.linkedWheelId ? (
               <div>

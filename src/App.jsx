@@ -3,42 +3,62 @@ import Home from './components/Home';
 import WheelSpin from './components/WheelSpin';
 import SettingsModal from './components/SettingsModal';
 import { getVibrantColor } from './utils';
+import { audio } from './audio';
+
 
 // Default list of wheels if none are stored in localStorage
 const getDefaultWheels = () => [
   {
-    id: 'default-1',
-    name: 'Daily Choices 🔮',
+    id: 'sub-5',
+    name: '5 Gifted Subs',
     spinDuration: 10,
     originalOptions: [
       {
-        id: 'opt-1',
-        name: 'Work / Study 💻',
+        id: '5-opt-1',
+        name: 'Drink a full glass of water',
         weight: 40,
+        lives: 0,
+        currentLives: 0,
+        color: getVibrantColor(0),
+        subOption: null
+      },
+      {
+        id: '5-opt-2',
+        name: 'Timeout a random chatter for 1 minute',
+        weight: 20,
         lives: 3,
         currentLives: 3,
-        color: getVibrantColor(0),
+        color: getVibrantColor(1),
+        subOption: null
+      },
+      {
+        id: '5-opt-3',
+        name: 'Sing a chorus of a song chosen by chat',
+        weight: 20,
+        lives: 2,
+        currentLives: 2,
+        color: getVibrantColor(2),
         subOption: {
-          id: 'opt-1-sub',
-          name: 'Social Media Scroll 📱',
+          id: '5-opt-3-sub',
+          name: 'Eat a spoonful of hot sauce',
           weight: 15,
           lives: 1,
           currentLives: 1,
-          color: getVibrantColor(4),
+          color: getVibrantColor(3),
           subOption: null
         }
       },
       {
-        id: 'opt-2',
-        name: 'Gym Workout 🏋️',
-        weight: 25,
-        lives: 2,
-        currentLives: 2,
-        color: getVibrantColor(1),
+        id: '5-opt-4',
+        name: 'Do 15 pushups',
+        weight: 14,
+        lives: 3,
+        currentLives: 3,
+        color: getVibrantColor(4),
         subOption: {
-          id: 'opt-2-sub',
-          name: 'Light Walk 🚶',
-          weight: 20,
+          id: '5-opt-4-sub',
+          name: 'Do 30 pushups',
+          weight: 25,
           lives: 1,
           currentLives: 1,
           color: getVibrantColor(5),
@@ -46,56 +66,157 @@ const getDefaultWheels = () => [
         }
       },
       {
-        id: 'opt-coffee',
-        name: 'Coffee Break ☕',
-        weight: 10,
+        id: '5-opt-link-10',
+        name: 'Link: 10 Gifted Subs Escalation',
+        weight: 5,
         lives: 0,
         currentLives: 0,
+        color: getVibrantColor(6),
+        linkedWheelId: 'sub-10',
+        subOption: null
+      },
+      {
+        id: '5-opt-link-20',
+        name: 'Link: 20 Gifted Subs Mega Wheel',
+        weight: 1,
+        lives: 0,
+        currentLives: 0,
+        color: getVibrantColor(7),
+        linkedWheelId: 'sub-20',
+        subOption: null
+      }
+    ],
+    activeOptions: []
+  },
+  {
+    id: 'sub-10',
+    name: '10 Gifted Subs',
+    spinDuration: 10,
+    originalOptions: [
+      {
+        id: '10-opt-1',
+        name: 'Do 25 squats',
+        weight: 32,
+        lives: 3,
+        currentLives: 3,
+        color: getVibrantColor(0),
+        subOption: {
+          id: '10-opt-1-sub',
+          name: 'Do 50 squats',
+          weight: 20,
+          lives: 1,
+          currentLives: 1,
+          color: getVibrantColor(1),
+          subOption: null
+        }
+      },
+      {
+        id: '10-opt-2',
+        name: 'No hydration for the next 15 minutes',
+        weight: 20,
+        lives: 2,
+        currentLives: 2,
         color: getVibrantColor(2),
         subOption: null
       },
       {
-        id: 'opt-play',
-        name: 'Play Video Games 🎮',
-        weight: 35,
-        lives: 1,
-        currentLives: 1,
-        color: getVibrantColor(3),
-        subOption: {
-          id: 'opt-play-sub',
-          name: 'Clean Room 🧹',
-          weight: 25,
-          lives: 1,
-          currentLives: 1,
-          color: getVibrantColor(6),
-          subOption: null
-        }
-      },
-      {
-        id: 'opt-meal',
-        name: 'Healthy Meal 🥗',
-        weight: 30,
+        id: '10-opt-3',
+        name: 'Draft a cringey tweet for chat to post',
+        weight: 15,
         lives: 2,
         currentLives: 2,
-        color: getVibrantColor(7),
+        color: getVibrantColor(3),
         subOption: null
       },
       {
-        id: 'opt-book',
-        name: 'Read a Book 📖',
-        weight: 30,
+        id: '10-opt-4',
+        name: 'Timeout your head moderator for 2 minutes',
+        weight: 15,
         lives: 2,
         currentLives: 2,
-        color: getVibrantColor(8),
-        subOption: {
-          id: 'opt-book-sub',
-          name: 'Watch Movie 🎬',
-          weight: 20,
-          lives: 2,
-          currentLives: 2,
-          color: getVibrantColor(9),
-          subOption: null
-        }
+        color: getVibrantColor(4),
+        subOption: null
+      },
+      {
+        id: '10-opt-5',
+        name: 'Call a random contact and explain stream details',
+        weight: 10,
+        lives: 1,
+        currentLives: 1,
+        color: getVibrantColor(5),
+        subOption: null
+      },
+      {
+        id: '10-opt-link-20',
+        name: 'Link: 20 Gifted Subs Mega Wheel',
+        weight: 8,
+        lives: 0,
+        currentLives: 0,
+        color: getVibrantColor(6),
+        linkedWheelId: 'sub-20',
+        subOption: null
+      }
+    ],
+    activeOptions: []
+  },
+  {
+    id: 'sub-20',
+    name: '20 Gifted Subs',
+    spinDuration: 12,
+    originalOptions: [
+      {
+        id: '20-opt-1',
+        name: 'Eat a whole raw onion',
+        weight: 5,
+        lives: 1,
+        currentLives: 1,
+        color: getVibrantColor(0),
+        subOption: null
+      },
+      {
+        id: '20-opt-2',
+        name: 'Shave a patch of leg or arm hair',
+        weight: 10,
+        lives: 1,
+        currentLives: 1,
+        color: getVibrantColor(1),
+        subOption: null
+      },
+      {
+        id: '20-opt-3',
+        name: 'Gift 5 subs to another active streamer',
+        weight: 15,
+        lives: 2,
+        currentLives: 2,
+        color: getVibrantColor(2),
+        subOption: null
+      },
+      {
+        id: '20-opt-4',
+        name: 'Ice cubes down shirt for 3 minutes',
+        weight: 20,
+        lives: 2,
+        currentLives: 2,
+        color: getVibrantColor(3),
+        subOption: null
+      },
+      {
+        id: '20-opt-5',
+        name: 'Marker drawing on face for rest of stream',
+        weight: 20,
+        lives: 2,
+        currentLives: 2,
+        color: getVibrantColor(4),
+        subOption: null
+      },
+      {
+        id: '20-opt-6',
+        name: 'Play chatter chosen sound on loop for 5 minutes',
+        weight: 30,
+        lives: 3,
+        currentLives: 3,
+        color: getVibrantColor(5),
+        subOption: null
       }
     ],
     activeOptions: []
@@ -122,6 +243,7 @@ export default function App() {
   const [wheelStack, setWheelStack] = useState([]);
   const [autoSpinActive, setAutoSpinActive] = useState(false);
   const [nestedResult, setNestedResult] = useState(null);
+  const [flamesActive, setFlamesActive] = useState(false);
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'wheel'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -195,11 +317,25 @@ export default function App() {
     saveWheels(updated);
   };
 
-  const handleTransitionToWheel = (linkedWheelId, originOptionId) => {
-    console.log('[APP] Transitioning to linked wheel:', linkedWheelId, 'from option:', originOptionId);
-    setWheelStack(prev => [...prev, { wheelId: activeWheelId, originOptionId }]);
-    setActiveWheelId(linkedWheelId);
-    setAutoSpinActive(true);
+  const handleTransitionToWheel = (linkedWheelId, originOption) => {
+    console.log('[APP] Transitioning to linked wheel:', linkedWheelId, 'from option:', originOption.name);
+    
+    audio.playFlameWhoosh();
+    setFlamesActive(true);
+
+    setTimeout(() => {
+      setWheelStack(prev => [...prev, { 
+        wheelId: activeWheelId, 
+        originOptionId: originOption.id,
+        originOptionName: originOption.name 
+      }]);
+      setActiveWheelId(linkedWheelId);
+      setAutoSpinActive(true);
+    }, 1200);
+
+    setTimeout(() => {
+      setFlamesActive(false);
+    }, 2400);
   };
 
   const handleSpinEnd = (winner) => {
@@ -243,14 +379,38 @@ export default function App() {
     // If we are in a nested wheel run, return to top-level starting wheel
     if (wheelStack.length > 0) {
       const topLevel = wheelStack[0];
-      console.log('[APP] Nested run ended. Returning to top-level starting wheel:', topLevel.wheelId);
-      setNestedResult({
-        optionName: winner.name,
-        color: winner.color,
-        originOptionId: topLevel.originOptionId
-      });
-      setActiveWheelId(topLevel.wheelId);
-      setWheelStack([]);
+      console.log('[APP] Nested run ended. Returning to top-level starting wheel with flames:', topLevel.wheelId);
+      
+      audio.playFlameWhoosh();
+      setFlamesActive(true);
+
+      // Compile the nesting rundown chain
+      const currentWheelName = wheels.find(w => w.id === activeWheelId)?.name || 'Sub Wheel';
+      const rundown = [
+        ...wheelStack.map(item => ({
+          wheelName: wheels.find(w => w.id === item.wheelId)?.name || 'Wheel',
+          optionName: item.originOptionName
+        })),
+        {
+          wheelName: currentWheelName,
+          optionName: winner.name
+        }
+      ];
+
+      setTimeout(() => {
+        setNestedResult({
+          optionName: winner.name,
+          color: winner.color,
+          originOptionId: topLevel.originOptionId,
+          rundown
+        });
+        setActiveWheelId(topLevel.wheelId);
+        setWheelStack([]);
+      }, 1200);
+
+      setTimeout(() => {
+        setFlamesActive(false);
+      }, 2400);
     }
   };
 
@@ -498,6 +658,31 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       
+      {/* Fullscreen Symmetrical Flames transition overlay */}
+      <div className={`flames-container ${flamesActive ? 'active' : ''}`}>
+        {Array.from({ length: 24 }).map((_, i) => {
+          const isLeft = i % 2 === 0;
+          const offset = -90 + Math.random() * 80;
+          const delay = Math.random() * 1.2;
+          const duration = 0.8 + Math.random() * 0.7;
+          const size = 30 + Math.random() * 40;
+          return (
+            <div 
+              key={i} 
+              className="flame-particle" 
+              style={{
+                left: isLeft ? `${offset}px` : 'auto',
+                right: !isLeft ? `${offset}px` : 'auto',
+                animationDelay: `${delay}s`,
+                animationDuration: `${duration}s`,
+                width: `${size}px`,
+                height: `${size}px`
+              }}
+            />
+          );
+        })}
+      </div>
+      
       {/* Navbar header */}
       <nav style={{
         padding: '16px 30px',
@@ -562,6 +747,7 @@ export default function App() {
         ) : (
           activeWheel && (
             <WheelSpin 
+              key={activeWheelId}
               wheel={activeWheel} 
               wheels={wheels}
               autoSpin={autoSpinActive}
