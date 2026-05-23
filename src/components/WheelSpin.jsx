@@ -6,6 +6,12 @@ import ResetConfirmModal from './ResetConfirmModal';
 
 export default function WheelSpin({ 
   wheel, 
+  wheels = [],
+  autoSpin = false,
+  onClearAutoSpin,
+  onTransitionToWheel,
+  nestedResult = null,
+  onClearNestedResult,
   onSpinEnd, 
   onOpenSettings, 
   onBackHome, 
@@ -16,6 +22,7 @@ export default function WheelSpin({
   const [winner, setWinner] = useState(null);
   const [winnerModalOpen, setWinnerModalOpen] = useState(false);
   const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [flamesActive, setFlamesActive] = useState(false);
   
   // Animation state refs to avoid React re-render lag
   const angleRef = useRef(0); // Current rotation angle
@@ -126,6 +133,49 @@ export default function WheelSpin({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeOptions, segments]);
+
+  // Handle autoSpin on mounting (linked wheel auto-run)
+  useEffect(() => {
+    if (autoSpin) {
+      console.log('[WHEEL] Auto-spin triggered for:', wheel.name);
+      audio.playFlameWhoosh();
+      
+      const flameStartTimeout = setTimeout(() => {
+        setFlamesActive(true);
+      }, 0);
+      
+      const spinTimeout = setTimeout(() => {
+        handleSpin();
+        if (onClearAutoSpin) onClearAutoSpin();
+      }, 350);
+
+      const flamesTimeout = setTimeout(() => {
+        setFlamesActive(false);
+      }, 1800);
+
+      return () => {
+        clearTimeout(flameStartTimeout);
+        clearTimeout(spinTimeout);
+        clearTimeout(flamesTimeout);
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSpin]);
+
+  // Handle returned nested result from sub-wheel
+  useEffect(() => {
+    if (nestedResult) {
+      console.log('[WHEEL] Received nestedResult:', nestedResult);
+      const originOption = activeOptionsRef.current.find(opt => opt.id === nestedResult.originOptionId);
+      if (originOption) {
+        setWinner(originOption);
+        setWinnerModalOpen(true);
+      } else {
+        if (onClearNestedResult) onClearNestedResult();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nestedResult]);
 
   const getDynamicSegments = () => {
     const opts = activeOptionsRef.current;
@@ -1021,6 +1071,24 @@ export default function WheelSpin({
   const handleConfirmWinner = () => {
     setWinnerModalOpen(false);
     
+    // Check if the option is a link to another wheel
+    if (winner && winner.linkedWheelId) {
+      console.log('[WHEEL] Confirming linked wheel transition to:', winner.linkedWheelId);
+      audio.playFlameWhoosh();
+      setFlamesActive(true);
+      
+      setTimeout(() => {
+        setFlamesActive(false);
+        onTransitionToWheel(winner.linkedWheelId, winner.id);
+      }, 1500);
+      return;
+    }
+
+    // Clear nested result state in parent when returning
+    if (nestedResult && onClearNestedResult) {
+      onClearNestedResult();
+    }
+
     if (winner && winner.lives > 0 && winner.currentLives === 1) {
       const winningIndex = activeOptionsRef.current.findIndex(opt => opt.id === winner.id);
       if (winningIndex !== -1) {
@@ -1051,15 +1119,7 @@ export default function WheelSpin({
   };
 
   return (
-    <div className="wheelspin-page animate-fade-in" style={{
-      maxWidth: '1400px',
-      margin: '0 auto',
-      padding: '20px 16px 40px 16px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '24px'
-    }}>
+    <div className="wheelspin-page animate-fade-in">
       
       {/* Top Navbar Actions */}
       <div style={{
@@ -1106,13 +1166,40 @@ export default function WheelSpin({
           </h2>
 
           <div className="wheel-container">
+            {/* Flames background container */}
+            <div className={`flames-container ${flamesActive ? 'active' : ''}`}>
+              {Array.from({ length: 24 }).map((_, i) => {
+                const isLeft = i % 2 === 0;
+                const offset = -90 + Math.random() * 80;
+                const delay = Math.random() * 1.2;
+                const duration = 0.8 + Math.random() * 0.7;
+                const size = 30 + Math.random() * 40;
+                return (
+                  <div 
+                    key={i} 
+                    className="flame-particle" 
+                    style={{
+                      left: isLeft ? `${offset}px` : 'auto',
+                      right: !isLeft ? `${offset}px` : 'auto',
+                      animationDelay: `${delay}s`,
+                      animationDuration: `${duration}s`,
+                      width: `${size}px`,
+                      height: `${size}px`
+                    }}
+                  />
+                );
+              })}
+            </div>
+
             <canvas 
               ref={canvasRef} 
               style={{
                 width: '100%',
                 height: '100%',
                 display: 'block',
-                cursor: isSpinning ? 'not-allowed' : 'pointer'
+                cursor: isSpinning ? 'not-allowed' : 'pointer',
+                position: 'relative',
+                zIndex: 1
               }}
               onClick={handleSpin}
             />
@@ -1222,6 +1309,8 @@ export default function WheelSpin({
         isOpen={winnerModalOpen}
         winner={winner}
         isWinnerLegendary={isWinnerLegendary}
+        nestedResult={nestedResult}
+        wheels={wheels}
         onConfirm={handleConfirmWinner}
       />
 

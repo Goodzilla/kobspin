@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getVibrantColor, generateId } from '../utils';
 
-export default function SettingsModal({ wheel, onSave, onClose }) {
+export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
   const [wheelName, setWheelName] = useState(wheel.name);
   const [spinDuration, setSpinDuration] = useState(wheel.spinDuration || 10);
   const [options, setOptions] = useState(
@@ -125,6 +125,8 @@ export default function SettingsModal({ wheel, onSave, onClose }) {
           style={{
             padding: '16px 20px',
             marginLeft: `${depth * 24}px`,
+            width: '620px',
+            flexShrink: 0,
             position: 'relative',
             borderLeft: depth > 0 ? `4px solid ${opt.color}` : '1px solid var(--border-glass)',
             backgroundColor: 'rgba(255, 255, 255, 0.06)',
@@ -181,6 +183,64 @@ export default function SettingsModal({ wheel, onSave, onClose }) {
                 placeholder="Option Label (e.g. Pizza 🍕)"
                 style={{ width: '100%' }}
               />
+            </div>
+
+            {/* Option Type and Target Wheel Selection */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Option Type</label>
+                <select
+                  value={opt.linkedWheelId ? 'link' : 'standard'}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'standard') {
+                      updateOption(opt.id, { linkedWheelId: null });
+                    } else {
+                      const otherWheels = wheels.filter(w => w.id !== wheel.id);
+                      const defaultTarget = otherWheels[0];
+                      updateOption(opt.id, {
+                        linkedWheelId: defaultTarget ? defaultTarget.id : '',
+                        name: opt.name.startsWith('Option') && defaultTarget ? `Link: ${defaultTarget.name}` : opt.name
+                      });
+                    }
+                  }}
+                  className="form-input"
+                  style={{ background: 'var(--bg-secondary)', color: '#fff', cursor: 'pointer', width: '100%' }}
+                >
+                  <option value="standard">Standard Option</option>
+                  <option value="link">Link to Another Wheel 🌀</option>
+                </select>
+              </div>
+
+              {opt.linkedWheelId !== undefined && opt.linkedWheelId !== null && (
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Target Wheel</label>
+                  <select
+                    value={opt.linkedWheelId}
+                    onChange={(e) => {
+                      const targetId = e.target.value;
+                      const targetWheel = wheels.find(w => w.id === targetId);
+                      updateOption(opt.id, {
+                        linkedWheelId: targetId,
+                        name: targetWheel ? `Link: ${targetWheel.name}` : opt.name
+                      });
+                    }}
+                    className="form-input"
+                    style={{ background: 'var(--bg-secondary)', color: '#fff', cursor: 'pointer', width: '100%' }}
+                  >
+                    <option value="" disabled>-- Select Wheel --</option>
+                    {wheels.filter(w => w.id !== wheel.id).length === 0 ? (
+                      <option disabled>No other wheels created</option>
+                    ) : (
+                      wheels
+                        .filter(w => w.id !== wheel.id)
+                        .map(w => (
+                          <option key={w.id} value={w.id}>{w.name}</option>
+                        ))
+                    )}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="form-row" style={{ gap: '12px', alignItems: 'flex-end' }}>
@@ -295,8 +355,8 @@ export default function SettingsModal({ wheel, onSave, onClose }) {
       <div 
         className="glass-panel animate-scale-in" 
         style={{
-          maxWidth: '640px',
-          width: '100%',
+          width: '95vw',
+          maxWidth: '1000px',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
@@ -368,8 +428,10 @@ export default function SettingsModal({ wheel, onSave, onClose }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h3 style={{ fontSize: '1.1rem', color: '#fff' }}>Wheel Slices & Options</h3>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {options.map((opt) => renderOptionNode(opt))}
+            <div className="settings-options-scroll">
+              <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '16px', minWidth: '100%', width: 'max-content', paddingRight: '20px' }}>
+                {options.map((opt) => renderOptionNode(opt))}
+              </div>
             </div>
 
             <button

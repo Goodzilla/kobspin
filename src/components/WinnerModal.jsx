@@ -4,13 +4,19 @@ export default function WinnerModal({
   isOpen,
   winner,
   isWinnerLegendary,
+  nestedResult = null,
+  wheels = [],
   onConfirm
 }) {
   if (!isOpen || !winner) return null;
 
-  const glowColor = isWinnerLegendary ? '#ffd700' : winner.color;
-  const borderColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.45)' : `${winner.color}66`;
-  const shadowColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.3)' : `${winner.color}33`;
+  const displayColor = nestedResult ? nestedResult.color : winner.color;
+  const glowColor = isWinnerLegendary ? '#ffd700' : displayColor;
+  const borderColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.45)' : `${displayColor}66`;
+  const shadowColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.3)' : `${displayColor}33`;
+
+  const linkedWheel = winner.linkedWheelId ? wheels.find(w => w.id === winner.linkedWheelId) : null;
+  const linkedWheelName = linkedWheel ? linkedWheel.name : 'Sub Wheel';
 
   // Precompute lives stagger heart arrays
   const activeCount = Math.max(0, winner.currentLives - 1);
@@ -74,6 +80,20 @@ export default function WinnerModal({
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
+          {nestedResult && (
+            <div style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '0.8rem',
+              fontWeight: 800,
+              color: 'var(--color-info)',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              marginBottom: '16px',
+              textShadow: '0 0 10px rgba(6, 182, 212, 0.6)'
+            }}>
+              🌀 Nested Wheel Result! 🌀
+            </div>
+          )}
           {isWinnerLegendary && (
             <div style={{
               fontFamily: 'var(--font-heading)',
@@ -161,7 +181,7 @@ export default function WinnerModal({
                 margin: 0,
                 lineHeight: '1.2'
               }}>
-                {winner.name}
+                {nestedResult ? nestedResult.optionName : winner.name}
               </h2>
             </div>
           </div>
@@ -178,7 +198,49 @@ export default function WinnerModal({
             WebkitBackdropFilter: 'blur(10px)',
             boxShadow: 'inset 0 2px 12px rgba(0,0,0,0.55)'
           }}>
-            {winner.lives === 0 ? (
+            {nestedResult ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '6px' }}>
+                  🎁 Nested Reward Earned!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.4, marginBottom: '12px' }}>
+                  You got: <strong>{nestedResult.optionName}</strong>! This cost a life of the origin slice <strong>{winner.name}</strong>.
+                </p>
+                {winner.lives > 0 && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', margin: '8px 0' }}>
+                      {heartArray.map((heart, idx) => (
+                        <span 
+                          key={heart.id} 
+                          className="heart-pop"
+                          style={{
+                            fontSize: '1.5rem',
+                            animationDelay: `${idx * 0.1}s`,
+                            filter: heart.char === '❤️' 
+                              ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
+                              : 'none'
+                          }}
+                        >
+                          {heart.char}
+                        </span>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                      ({Math.max(0, winner.currentLives - 1)} lives left)
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : winner.linkedWheelId ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-warning)', fontWeight: 600, marginBottom: '8px' }}>
+                  🌀 Nested Wheel Transition!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                  Confirming this will trigger an exciting transition and load the linked wheel: <strong>{linkedWheelName}</strong>!
+                </p>
+              </div>
+            ) : winner.lives === 0 ? (
               <div>
                 <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '6px' }}>
                   ✨ Infinite Legend!

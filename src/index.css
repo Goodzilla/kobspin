@@ -301,6 +301,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Responsive columns for WheelSpin page */
+.wheelspin-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 16px 40px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  transition: max-width 0.3s ease;
+}
+
 .wheelspin-layout {
   display: flex;
   flex-direction: row;
@@ -377,7 +389,7 @@ h1, h2, h3, h4, h5, h6 {
   filter: brightness(1.15);
 }
 
-/* Desktop layout: Side-by-side */
+/* Desktop layout: Side-by-side scaling */
 @media (min-width: 1200px) {
   .wheelspin-layout {
     gap: 60px;
@@ -386,29 +398,55 @@ h1, h2, h3, h4, h5, h6 {
     display: block;
     width: 320px;
     flex-shrink: 0;
+    transition: width 0.3s ease;
   }
   .wheelspin-sidebar-col {
     width: 320px;
     flex-shrink: 0;
     max-width: none;
+    transition: width 0.3s ease;
   }
   .wheel-container {
-    width: min(90vw, 75vh, 560px);
+    width: min(90vw, 78vh, 660px);
+    transition: width 0.3s ease;
   }
 }
 
-@media (min-width: 1350px) {
+@media (min-width: 1500px) {
+  .wheelspin-page {
+    max-width: 1700px;
+    padding: 20px 32px 40px 32px;
+  }
   .wheelspin-layout {
     gap: 80px;
   }
   .wheelspin-spacer-col {
-    width: 320px;
+    width: 380px;
   }
   .wheelspin-sidebar-col {
-    width: 320px;
+    width: 380px;
   }
   .wheel-container {
-    width: min(90vw, 75vh, 600px);
+    width: min(90vw, 82vh, 760px);
+  }
+}
+
+@media (min-width: 1750px) {
+  .wheelspin-page {
+    max-width: 1920px;
+    padding: 20px 40px 40px 40px;
+  }
+  .wheelspin-layout {
+    gap: 100px;
+  }
+  .wheelspin-spacer-col {
+    width: 440px;
+  }
+  .wheelspin-sidebar-col {
+    width: 440px;
+  }
+  .wheel-container {
+    width: min(90vw, 85vh, 860px);
   }
 }
 
@@ -432,6 +470,78 @@ h1, h2, h3, h4, h5, h6 {
   50% {
     box-shadow: 0 6px 22px rgba(139, 92, 246, 0.6), 0 0 0 8px rgba(139, 92, 246, 0);
     transform: scale(1.03);
+  }
+}
+
+/* Settings Modal options horizontal scroll wrapper */
+.settings-options-scroll {
+  overflow-x: auto;
+  padding-bottom: 12px;
+  width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-glass-focus) transparent;
+}
+
+.settings-options-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.settings-options-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-options-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-glass-focus);
+  border-radius: 3px;
+}
+
+/* Flame animation overlay behind the wheel */
+.flames-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.flames-container.active {
+  opacity: 1;
+}
+
+/* Single flame particle */
+.flame-particle {
+  position: absolute;
+  bottom: 15%;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, #ffe359 10%, #ff8800 45%, #ef4444 80%, transparent 95%);
+  border-radius: 50% 50% 20% 50%;
+  transform: rotate(-45deg);
+  filter: blur(5px);
+  mix-blend-mode: screen;
+  animation: rise-flame 1.2s infinite ease-in;
+  opacity: 0;
+}
+
+@keyframes rise-flame {
+  0% {
+    transform: translateY(120px) scale(0.2) rotate(-45deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  60% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-280px) scale(1.6) rotate(15deg);
+    opacity: 0;
   }
 }
 

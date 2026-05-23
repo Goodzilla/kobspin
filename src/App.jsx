@@ -119,6 +119,9 @@ export default function App() {
     }
   });
   const [activeWheelId, setActiveWheelId] = useState(null);
+  const [wheelStack, setWheelStack] = useState([]);
+  const [autoSpinActive, setAutoSpinActive] = useState(false);
+  const [nestedResult, setNestedResult] = useState(null);
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'wheel'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -192,6 +195,13 @@ export default function App() {
     saveWheels(updated);
   };
 
+  const handleTransitionToWheel = (linkedWheelId, originOptionId) => {
+    console.log('[APP] Transitioning to linked wheel:', linkedWheelId, 'from option:', originOptionId);
+    setWheelStack(prev => [...prev, { wheelId: activeWheelId, originOptionId }]);
+    setActiveWheelId(linkedWheelId);
+    setAutoSpinActive(true);
+  };
+
   const handleSpinEnd = (winner) => {
     console.log('[APP] handleSpinEnd called with:', winner);
     if (!winner || !activeWheelId) return;
@@ -229,6 +239,19 @@ export default function App() {
 
     console.log('[APP] Updated wheels activeOptions:', updated.find(w => w.id === activeWheelId)?.activeOptions);
     saveWheels(updated);
+
+    // If we are in a nested wheel run, return to top-level starting wheel
+    if (wheelStack.length > 0) {
+      const topLevel = wheelStack[0];
+      console.log('[APP] Nested run ended. Returning to top-level starting wheel:', topLevel.wheelId);
+      setNestedResult({
+        optionName: winner.name,
+        color: winner.color,
+        originOptionId: topLevel.originOptionId
+      });
+      setActiveWheelId(topLevel.wheelId);
+      setWheelStack([]);
+    }
   };
 
   const handleSaveSettings = (name, originalOptions, spinDuration) => {
@@ -540,11 +563,20 @@ export default function App() {
           activeWheel && (
             <WheelSpin 
               wheel={activeWheel} 
+              wheels={wheels}
+              autoSpin={autoSpinActive}
+              onClearAutoSpin={() => setAutoSpinActive(false)}
+              onTransitionToWheel={handleTransitionToWheel}
+              nestedResult={nestedResult}
+              onClearNestedResult={() => setNestedResult(null)}
+              wheelStack={wheelStack}
               onSpinEnd={handleSpinEnd} 
               onOpenSettings={() => setIsSettingsOpen(true)} 
               onBackHome={() => {
                 setCurrentView('home');
                 setActiveWheelId(null);
+                setWheelStack([]);
+                setNestedResult(null);
               }} 
               onResetWheel={handleResetWheel}
             />
@@ -556,6 +588,7 @@ export default function App() {
       {isSettingsOpen && activeWheel && (
         <SettingsModal 
           wheel={activeWheel} 
+          wheels={wheels}
           onSave={handleSaveSettings} 
           onClose={() => setIsSettingsOpen(false)} 
         />

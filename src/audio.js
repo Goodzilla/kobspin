@@ -329,6 +329,46 @@ class AudioEngine {
     oscFinal.start(delayTime);
     oscFinal.stop(delayTime + 1.3);
   }
+
+  playFlameWhoosh() {
+    this.init();
+    if (!this.ctx) return;
+    
+    const now = this.ctx.currentTime;
+    
+    try {
+      const duration = 1.5;
+      const bufferSize = this.ctx.sampleRate * duration;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(80, now);
+      filter.frequency.exponentialRampToValueAtTime(600, now + 0.4); // Sweeps up
+      filter.frequency.exponentialRampToValueAtTime(120, now + duration); // Sweeps down
+      
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.35, now + 0.3); // Exciting attack
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Fade out
+      
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      
+      noise.start(now);
+      noise.stop(now + duration + 0.05);
+    } catch (e) {
+      console.warn("Flame whoosh sound failed", e);
+    }
+  }
 }
 
 export const audio = new AudioEngine();
