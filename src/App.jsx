@@ -326,6 +326,23 @@ export default function App() {
     const count = 24 * Math.pow(2, depth);
     setFlameCount(count);
     
+    // Initialize target wheel's activeOptions if empty
+    const updated = wheels.map(w => {
+      if (w.id !== linkedWheelId) return w;
+      if (!w.activeOptions || w.activeOptions.length === 0) {
+        const cloned = JSON.parse(JSON.stringify(w.originalOptions));
+        const resetLives = (opt) => {
+          if (!opt) return;
+          opt.currentLives = opt.lives;
+          if (opt.subOption) resetLives(opt.subOption);
+        };
+        cloned.forEach(resetLives);
+        return { ...w, activeOptions: cloned };
+      }
+      return w;
+    });
+    saveWheels(updated);
+
     audio.playFlameWhoosh();
     setFlamesActive(true);
 
