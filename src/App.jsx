@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Home from './components/Home';
 import WheelSpin from './components/WheelSpin';
 import SettingsModal from './components/SettingsModal';
+import Faq from './components/Faq';
 import { getVibrantColor } from './utils';
 import { audio } from './audio';
 
@@ -255,7 +256,11 @@ export default function App() {
   // Dynamic Document Title for SEO and User Experience
   useEffect(() => {
     if (currentView === 'home' || !activeWheelId) {
-      document.title = "KobSpin - Custom Spinner Wheel & Random Name Picker (Nested & Weighted)";
+      if (currentView === 'faq') {
+        document.title = "FAQ | KobSpin - Custom Spinner Wheel & Random Name Picker";
+      } else {
+        document.title = "KobSpin - Custom Spinner Wheel & Random Name Picker (Nested & Weighted)";
+      }
     } else {
       const activeWheel = wheels.find(w => w.id === activeWheelId);
       if (activeWheel) {
@@ -759,6 +764,16 @@ export default function App() {
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <button 
             onClick={() => {
+              setCurrentView('faq');
+              setActiveWheelId(null);
+            }} 
+            className="btn btn-secondary"
+            style={{ fontSize: '0.85rem', padding: '8px 16px', borderColor: currentView === 'faq' ? 'var(--color-accent)' : 'var(--border-glass)' }}
+          >
+            💬 FAQ
+          </button>
+          <button 
+            onClick={() => {
               setOnboardingStep(1);
               setShowOnboarding(true);
             }} 
@@ -790,6 +805,8 @@ export default function App() {
             onDeleteWheel={handleDeleteWheel} 
             onResetToDefaults={handleResetToDefaultWheels}
           />
+        ) : currentView === 'faq' ? (
+          <Faq onBack={() => setCurrentView('home')} />
         ) : (
           activeWheel && (
             <WheelSpin 
