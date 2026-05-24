@@ -114,18 +114,45 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
         zIndex: -1
       }} />
 
-      <header style={{ textAlign: 'center', marginBottom: '60px' }}>
-        <h1 style={{
-          fontSize: '3.7rem',
-          background: 'linear-gradient(135deg, #ffffff 30%, #c084fc 80%, #8b5cf6 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          marginBottom: '12px',
-          letterSpacing: '-0.03em'
+      <header style={{ 
+        textAlign: 'center', 
+        marginBottom: '50px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center' 
+      }}>
+        
+        {/* Sleek, Premium Geometrical Logo Mark */}
+        <div style={{
+          width: '72px',
+          height: '72px',
+          borderRadius: '18px',
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '20px'
         }}>
-          KOB<span style={{ color: 'var(--color-accent)', textShadow: '0 0 25px rgba(139, 92, 246, 0.45)' }}>SPIN</span>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}>
+            <circle cx="12" cy="12" r="10" strokeOpacity="0.2"/>
+            <path d="M12 2a10 10 0 0 1 10 10" />
+            <path d="M12 12L19 5" />
+            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+          </svg>
+        </div>
+
+        <h1 style={{
+          fontSize: '3.2rem',
+          fontWeight: 800,
+          color: '#ffffff',
+          marginBottom: '10px',
+          letterSpacing: '-0.04em'
+        }}>
+          Kob<span style={{ color: 'var(--color-accent)' }}>Spin</span>
         </h1>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', marginBottom: '20px' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', marginBottom: '20px', maxWidth: '520px', lineHeight: '1.5' }}>
           Create custom wheels with nested, unlockable options and variable weights.
         </p>
         {onResetToDefaults && (

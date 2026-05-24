@@ -738,16 +738,22 @@ export default function App() {
           style={{ 
             fontFamily: 'var(--font-heading)', 
             fontWeight: 800, 
-            fontSize: '1.4rem', 
+            fontSize: '1.3rem', 
             cursor: 'pointer',
-            letterSpacing: '-0.02em',
+            letterSpacing: '-0.03em',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '6px'
           }}
         >
-          🌀 <span style={{ background: 'linear-gradient(135deg, #a855f7 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            KobSpin
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}>
+            <circle cx="12" cy="12" r="10" strokeOpacity="0.2"/>
+            <path d="M12 2a10 10 0 0 1 10 10" />
+            <path d="M12 12L19 5" />
+            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+          </svg>
+          <span style={{ color: '#ffffff' }}>
+            Kob<span style={{ color: 'var(--color-accent)' }}>Spin</span>
           </span>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
