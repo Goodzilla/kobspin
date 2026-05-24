@@ -310,7 +310,7 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
           Progressive Spinner Wheel Decider with Nested Unlockable Slices
         </h2>
         <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '24px', fontSize: '0.98rem' }}>
-          KobSpin is a free, modern <strong>custom spinner wheel</strong> maker and <strong>random name picker</strong> that introduces progressive gamification. Traditional decision wheels give a single static result. KobSpin allows you to link options, create **nested unlockable layers**, and configure custom slice lives (hearts). When an option runs out of lives, it shatters and unlocks its sub-options dynamically, changing the wheel’s layout and odds in real-time!
+          KobSpin is a free, modern <strong>custom spinner wheel</strong> maker and <strong>random name picker</strong> that introduces progressive gamification. Traditional decision wheels give a single static result. KobSpin allows you to link options, create <strong>nested unlockable layers</strong>, and configure custom slice lives (hearts). When an option runs out of lives, it shatters and unlocks its sub-options dynamically, changing the wheel's layout and odds in real-time!
         </p>
 
         <div style={{
