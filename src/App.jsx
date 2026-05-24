@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Home from './components/Home';
 import WheelSpin from './components/WheelSpin';
 import SettingsModal from './components/SettingsModal';
@@ -251,6 +251,18 @@ export default function App() {
     return !localStorage.getItem('kobspin_onboarded');
   });
   const [onboardingStep, setOnboardingStep] = useState(1);
+
+  // Dynamic Document Title for SEO and User Experience
+  useEffect(() => {
+    if (currentView === 'home' || !activeWheelId) {
+      document.title = "KobSpin - Custom Spinner Wheel & Random Name Picker (Nested & Weighted)";
+    } else {
+      const activeWheel = wheels.find(w => w.id === activeWheelId);
+      if (activeWheel) {
+        document.title = `${activeWheel.name} | Custom Spinner Wheel - KobSpin`;
+      }
+    }
+  }, [currentView, activeWheelId, wheels]);
 
   // Save to localStorage when wheels change
   const saveWheels = (updatedWheels) => {

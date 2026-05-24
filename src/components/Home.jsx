@@ -144,6 +144,19 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
         )}
       </header>
 
+      <h2 style={{
+        fontSize: '1.3rem',
+        marginBottom: '20px',
+        fontWeight: 650,
+        color: '#fff',
+        opacity: 0.9,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px'
+      }}>
+        🌀 Select or Create a Spinner Wheel
+      </h2>
+
       <div className="wheels-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -258,6 +271,53 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
           );
         })}
       </div>
+
+      {/* SEO Explainer Content for PageRank & Visibility */}
+      <section style={{
+        marginTop: '80px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+        paddingTop: '40px',
+        textAlign: 'left'
+      }}>
+        <h2 style={{ fontSize: '1.8rem', color: '#fff', marginBottom: '16px' }}>
+          Progressive Spinner Wheel Decider with Nested Unlockable Slices
+        </h2>
+        <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '24px', fontSize: '0.98rem' }}>
+          KobSpin is a free, modern <strong>custom spinner wheel</strong> maker and <strong>random name picker</strong> that introduces progressive gamification. Traditional decision wheels give a single static result. KobSpin allows you to link options, create **nested unlockable layers**, and configure custom slice lives (hearts). When an option runs out of lives, it shatters and unlocks its sub-options dynamically, changing the wheel’s layout and odds in real-time!
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '24px'
+        }}>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', color: 'var(--color-accent)', marginBottom: '8px' }}>
+              🎮 Gamified Decision Making
+            </h3>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              Use nested options to build fallback rewards, progression paths, or twitch streaming punishment chains (like subathon challenges).
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', color: 'var(--color-info)', marginBottom: '8px' }}>
+              ⚖️ Weighted Probabilities
+            </h3>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              Fine-tune the exact percentage odds for each segment by adjusting weight parameters. Perfect for fair raffle picker giveaways or balanced contest wheels.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', color: 'var(--color-success)', marginBottom: '8px' }}>
+              🔒 Save & Embed Offline
+            </h3>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              All custom spinner configurations are automatically saved to browser localStorage, ensuring your data is persisted securely for your next classroom session or stream.
+            </p>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
