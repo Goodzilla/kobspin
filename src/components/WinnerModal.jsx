@@ -1,5 +1,7 @@
 
 
+import { createPortal } from 'react-dom';
+
 export default function WinnerModal({
   isOpen,
   winner,
@@ -10,10 +12,18 @@ export default function WinnerModal({
 }) {
   if (!isOpen || !winner) return null;
 
+  const isShrouded = !nestedResult && winner.currentShrouds > 1;
+  const isShroudBreaking = !nestedResult && winner.currentShrouds === 1;
+  const isShielded = !nestedResult && !isShrouded && !isShroudBreaking && winner.currentShields > 1;
+  const isShieldBreaking = !nestedResult && !isShrouded && !isShroudBreaking && winner.currentShields === 1;
+
   const displayColor = nestedResult ? nestedResult.color : winner.color;
-  const glowColor = isWinnerLegendary ? '#ffd700' : displayColor;
-  const borderColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.45)' : `${displayColor}66`;
-  const shadowColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.3)' : `${displayColor}33`;
+  let glowColor = isWinnerLegendary ? '#ffd700' : displayColor;
+  if (isShrouded) glowColor = '#a855f7';
+  if (isShielded) glowColor = '#06b6d4';
+
+  const borderColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.45)' : `${glowColor}66`;
+  const shadowColor = isWinnerLegendary ? 'rgba(255, 215, 0, 0.3)' : `${glowColor}33`;
 
   const linkedWheel = winner.linkedWheelId ? wheels.find(w => w.id === winner.linkedWheelId) : null;
   const linkedWheelName = linkedWheel ? linkedWheel.name : 'Sub Wheel';
@@ -25,19 +35,24 @@ export default function WinnerModal({
   for (let i = 0; i < activeCount; i++) heartArray.push({ id: `active-${i}`, char: '❤️' });
   for (let i = 0; i < inactiveCount; i++) heartArray.push({ id: `inactive-${i}`, char: '🖤' });
 
-  return (
+  // Precompute shroud and shield active counts
+  const activeShrouds = Math.max(0, winner.currentShrouds - 1);
+  const activeShields = Math.max(0, winner.currentShields - 1);
+
+  return createPortal(
     <div style={{
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
+      width: '100vw',
+      height: '100dvh',
       backgroundColor: 'rgba(5, 3, 10, 0.82)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 100,
       padding: '20px',
+      overflowY: 'auto',
       backdropFilter: 'blur(14px)',
       WebkitBackdropFilter: 'blur(14px)'
     }} className="animate-overlay">
@@ -45,11 +60,11 @@ export default function WinnerModal({
       {/* Soft breathing background halo */}
       <div style={{
         position: 'absolute',
-        top: '50%',
-        left: '50%',
-        width: '140%',
-        height: '140%',
-        background: `radial-gradient(circle, ${glowColor}25 0%, transparent 60%)`,
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `radial-gradient(circle at center, ${glowColor}25 0%, transparent 60%)`,
         pointerEvents: 'none',
         zIndex: 99,
         animation: 'modalGlowPulse 6s ease-in-out infinite'
@@ -143,8 +158,8 @@ export default function WinnerModal({
               justifyContent: 'center',
               zIndex: 1
             }}>
-              <span style={{ fontSize: '2.8rem', transform: 'translateY(-2px)' }}>
-                {isWinnerLegendary ? '👑' : '🏆'}
+              <span style={{ fontSize: '2.8rem', transform: 'translateY(-2px)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isShrouded ? '🌫️' : isShielded ? '🛡️' : (isWinnerLegendary ? '👑' : '🏆')}
               </span>
             </div>
           </div>
@@ -157,7 +172,7 @@ export default function WinnerModal({
             letterSpacing: '2.5px',
             marginBottom: '10px'
           }}>
-            Landed On!
+            {isShrouded ? 'Shroud Encountered' : isShielded ? 'Shield Engaged' : 'Landed On!'}
           </p>
 
           {/* Pill Badge Container with dynamic borders */}
@@ -181,7 +196,7 @@ export default function WinnerModal({
                 margin: 0,
                 lineHeight: '1.2'
               }}>
-                {nestedResult ? nestedResult.optionName : winner.name}
+                {nestedResult ? nestedResult.optionName : (isShrouded ? 'Hidden option' : winner.name)}
               </h2>
             </div>
           </div>
@@ -208,25 +223,32 @@ export default function WinnerModal({
                 </p>
                 {winner.lives > 0 && (
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', margin: '8px 0' }}>
-                      {heartArray.map((heart, idx) => (
-                        <span 
-                          key={heart.id} 
-                          className="heart-pop"
-                          style={{
-                            fontSize: '1.5rem',
-                            animationDelay: `${idx * 0.1}s`,
-                            filter: heart.char === '❤️' 
-                              ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
-                              : 'none'
-                          }}
-                        >
-                          {heart.char}
-                        </span>
-                      ))}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', margin: '8px 0', alignItems: 'center' }}>
+                      {winner.lives <= 5 ? (
+                        heartArray.map((heart, idx) => (
+                          <span 
+                            key={heart.id} 
+                            className="heart-pop"
+                            style={{
+                              fontSize: '1.5rem',
+                              animationDelay: `${idx * 0.1}s`,
+                              filter: heart.char === '❤️' 
+                                ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
+                                : 'none'
+                            }}
+                          >
+                            {heart.char}
+                          </span>
+                        ))
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.1rem', color: 'var(--color-text-primary)', fontWeight: 700 }}>
+                          <span style={{ color: 'var(--color-danger)', fontSize: '1.4rem', textShadow: '0 0 10px rgba(239, 68, 68, 0.8)' }}>❤️</span>
+                          <span>{activeCount} / {winner.lives}</span>
+                        </div>
+                      )}
                     </div>
                     <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
-                      ({Math.max(0, winner.currentLives - 1)} lives left)
+                      ({activeCount} lives left)
                     </p>
                   </div>
                 )}
@@ -315,6 +337,180 @@ export default function WinnerModal({
                   Confirming this will trigger an exciting transition and load the linked wheel: <strong>{linkedWheelName}</strong>!
                 </p>
               </div>
+            ) : isShrouded ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: '#a855f7', fontWeight: 600, marginBottom: '8px' }}>
+                  🌫️ Shrouded in Mist
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                  The shadows veil this option. Pierce the shroud {winner.currentShrouds - 1} more times to unveil the hidden path.
+                </p>
+                
+                {/* Shroud icons */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', margin: '14px 0', alignItems: 'center' }}>
+                  {winner.shrouds <= 3 ? (
+                    Array.from({ length: winner.shrouds }).map((_, idx) => (
+                      <span 
+                        key={`shroud-pop-${idx}`} 
+                        className="heart-pop"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          color: idx < activeShrouds ? '#a855f7' : 'var(--color-text-muted)',
+                          fontSize: '1.8rem',
+                          animationDelay: `${idx * 0.12}s`,
+                          filter: idx < activeShrouds 
+                            ? 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.8))'
+                            : 'none'
+                        }}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M19.36 10.04a6 6 0 0 0-11.32-2.24 4.5 4.5 0 0 0-.28 8.92h11.6a4 4 0 0 0 0-8z" />
+                        </svg>
+                      </span>
+                    ))
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', color: 'var(--color-text-primary)', fontWeight: 700 }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#a855f7', filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.8))' }}>
+                        <path d="M19.36 10.04a6 6 0 0 0-11.32-2.24 4.5 4.5 0 0 0-.28 8.92h11.6a4 4 0 0 0 0-8z" />
+                      </svg>
+                      <span>{activeShrouds} / {winner.shrouds}</span>
+                    </div>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+                  ({activeShrouds} shrouds remaining)
+                </p>
+              </div>
+            ) : isShroudBreaking ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '8px' }}>
+                  ✨ Shroud Dissipated!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                  The dark mist breaks, revealing the hidden path: <strong>{winner.name}</strong>!
+                </p>
+                
+                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '14px', marginTop: '14px' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+                    REVEALED OPTION LIVES:
+                  </p>
+                  {winner.lives === 0 ? (
+                    <span style={{ color: 'var(--color-success)', fontSize: '1.25rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1 }}>♾️ <span style={{ fontSize: '0.95rem', fontWeight: 650 }}>Infinite Lives</span></span>
+                  ) : winner.lives <= 3 ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                      {Array.from({ length: winner.lives }).map((_, idx) => (
+                        <span 
+                          key={`reveal-heart-${idx}`}
+                          className="heart-pop"
+                          style={{
+                            fontSize: '1.5rem',
+                            animationDelay: `${idx * 0.1}s`,
+                            filter: idx < winner.currentLives
+                              ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
+                              : 'none'
+                          }}
+                        >
+                          {idx < winner.currentLives ? '❤️' : '🖤'}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '1rem', color: 'var(--color-text-primary)', fontWeight: 650 }}>
+                      <span style={{ color: 'var(--color-danger)', fontSize: '1.3rem' }}>❤️</span>
+                      <span>{winner.currentLives} / {winner.lives}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : isShielded ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: '#06b6d4', fontWeight: 600, marginBottom: '8px' }}>
+                  🛡️ Shield Active
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                  This option is protected by an energy shield. Strike the defense {winner.currentShields - 1} more times to shatter it.
+                </p>
+
+                {/* Shield icons */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', margin: '14px 0', alignItems: 'center' }}>
+                  {winner.shields <= 3 ? (
+                    Array.from({ length: winner.shields }).map((_, idx) => (
+                      <span 
+                        key={`shield-pop-${idx}`} 
+                        className="heart-pop"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          color: idx < activeShields ? '#06b6d4' : 'var(--color-text-muted)',
+                          fontSize: '1.8rem',
+                          animationDelay: `${idx * 0.12}s`,
+                          filter: idx < activeShields 
+                            ? 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.8))'
+                            : 'none'
+                        }}
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                      </span>
+                    ))
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', color: 'var(--color-text-primary)', fontWeight: 700 }}>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#06b6d4', filter: 'drop-shadow(0 0 10px rgba(6, 182, 212, 0.8))' }}>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      </svg>
+                      <span>{activeShields} / {winner.shields}</span>
+                    </div>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+                  ({activeShields} shields remaining)
+                </p>
+              </div>
+            ) : isShieldBreaking ? (
+              <div>
+                <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '8px' }}>
+                  💥 Shield Shattered!
+                </p>
+                <p style={{ fontSize: '0.92rem', color: 'var(--color-text-secondary)', marginBottom: '14px', lineHeight: 1.4 }}>
+                  The glassy defense shatters, leaving the option vulnerable!
+                </p>
+                
+                <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '14px', marginTop: '14px' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>
+                    OPTION LIVES:
+                  </p>
+                  {winner.lives === 0 ? (
+                    <span style={{ color: 'var(--color-success)', fontSize: '1.25rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', lineHeight: 1 }}>♾️ <span style={{ fontSize: '0.95rem', fontWeight: 650 }}>Infinite Lives</span></span>
+                  ) : winner.lives <= 3 ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                      {Array.from({ length: winner.lives }).map((_, idx) => (
+                        <span 
+                          key={`reveal-heart-${idx}`}
+                          className="heart-pop"
+                          style={{
+                            fontSize: '1.5rem',
+                            animationDelay: `${idx * 0.1}s`,
+                            filter: idx < winner.currentLives
+                              ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
+                              : 'none'
+                          }}
+                        >
+                          {idx < winner.currentLives ? '❤️' : '🖤'}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '1rem', color: 'var(--color-text-primary)', fontWeight: 650 }}>
+                      <span style={{ color: 'var(--color-danger)', fontSize: '1.3rem' }}>❤️</span>
+                      <span>{winner.currentLives} / {winner.lives}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : winner.lives === 0 ? (
               <div>
                 <p style={{ fontSize: '1.05rem', color: 'var(--color-success)', fontWeight: 600, marginBottom: '6px' }}>
@@ -335,27 +531,35 @@ export default function WinnerModal({
                   display: 'flex',
                   justifyContent: 'center',
                   gap: '10px',
-                  margin: '14px 0'
+                  margin: '14px 0',
+                  alignItems: 'center'
                 }}>
-                  {heartArray.map((heart, idx) => (
-                    <span 
-                      key={heart.id} 
-                      className="heart-pop"
-                      style={{
-                        fontSize: '1.8rem',
-                        animationDelay: `${idx * 0.12}s`,
-                        filter: heart.char === '❤️' 
-                          ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
-                          : 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.15))'
-                      }}
-                    >
-                      {heart.char}
-                    </span>
-                  ))}
+                  {winner.lives <= 3 ? (
+                    heartArray.map((heart, idx) => (
+                      <span 
+                        key={heart.id} 
+                        className="heart-pop"
+                        style={{
+                          fontSize: '1.8rem',
+                          animationDelay: `${idx * 0.12}s`,
+                          filter: heart.char === '❤️' 
+                            ? 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.8))'
+                            : 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.15))'
+                        }}
+                      >
+                        {heart.char}
+                      </span>
+                    ))
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem', color: 'var(--color-text-primary)', fontWeight: 700 }}>
+                      <span style={{ color: 'var(--color-danger)', textShadow: '0 0 10px rgba(239, 68, 68, 0.8)', fontSize: '1.8rem' }}>❤️</span>
+                      <span>{activeCount} / {winner.lives}</span>
+                    </div>
+                  )}
                 </div>
 
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '8px' }}>
-                  ({winner.currentLives - 1} lives left)
+                  ({activeCount} lives left)
                 </p>
               </div>
             ) : winner.subOption ? (
@@ -405,6 +609,7 @@ export default function WinnerModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

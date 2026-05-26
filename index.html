@@ -2,22 +2,102 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%2216%22 height=%2216%22><text y=%2214%22>🌀</text></svg>" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KobSpin - Custom Spinner Wheel & Random Name Picker (Nested & Weighted)</title>
-    <meta name="description" content="KobSpin is the ultimate customizable random spinner wheel and decision maker online. Design weighted raffle wheels with nested unlockable options, progressive chains, and interactive sound effects. Perfect for classrooms, giveaways, games, and twitch streams." />
-    <meta name="keywords" content="custom spinner wheel, random wheel spinner, spin the wheel online, decision wheel decider, random name picker, weighted spinner wheel, nested spinner slices, raffle picker, classroom spinner wheel, twitch subathon wheel" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://kobspin.org" />
+    <title>KobSpin - Custom Spinner Wheel & Case Opening Lootbox Simulator (Nested & Weighted)</title>
+    <meta name="description" content="KobSpin is the ultimate customizable random spinner wheel, decision maker, and CS case-opening lootbox simulator online. Design weighted raffle wheels with nested unlockable options, progressive chains, interactive loot container openings, and sound effects. Perfect for classrooms, giveaways, and twitch streams." />
+    <meta name="keywords" content="custom spinner wheel, random wheel spinner, spin the wheel online, decision wheel decider, random name picker, weighted spinner wheel, nested spinner slices, raffle picker, classroom spinner wheel, twitch subathon wheel, lootbox spinner, cs case opening simulator" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="KobSpin - Custom Spinner Wheel & Random Name Picker (Nested & Weighted)" />
-    <meta property="og:description" content="The ultimate customizable random spinner wheel and decision maker. Design raffle wheels with nested unlockable options, progressive chains, and interactive sound effects." />
-    <meta property="og:url" content="https://kobspin.com/" />
+    <meta property="og:title" content="KobSpin - Custom Spinner Wheel & Case Opening Lootbox Simulator (Nested & Weighted)" />
+    <meta property="og:description" content="The ultimate customizable random spinner wheel, decision maker, and CS case opening simulator. Design raffle wheels with nested unlockable options, lootbox containers, and interactive sound effects." />
+    <meta property="og:url" content="https://kobspin.org/" />
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="KobSpin - Custom Spinner Wheel & Random Name Picker (Nested & Weighted)" />
-    <meta property="twitter:description" content="The ultimate customizable random spinner wheel and decision maker. Design raffle wheels with nested unlockable options, progressive chains, and interactive sound effects." />
+    <meta property="twitter:title" content="KobSpin - Custom Spinner Wheel & Case Opening Lootbox Simulator (Nested & Weighted)" />
+    <meta property="twitter:description" content="The ultimate customizable random spinner wheel, decision maker, and CS case opening simulator. Design raffle wheels with nested unlockable options, lootbox containers, and interactive sound effects." />
+
+    <!-- Structured Data (JSON-LD) for WebApplication and FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://kobspin.org/#webapp",
+          "url": "https://kobspin.org/",
+          "name": "KobSpin",
+          "applicationCategory": "UtilityApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires HTML5 Canvas and JavaScript",
+          "description": "KobSpin is a free, premium custom spinner wheel, decision maker, and lootbox case opening container simulator that introduces progressive gamification. Link options, configure slices with custom heart lives, enable CS:GO case opening tickers, and unlock nested layers dynamically.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://kobspin.org/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Where is my custom wheel configuration data stored?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "All your custom spinner configurations, segment weights, and option lives are saved directly in your browser's local storage (localStorage). This means your wheels never leave your device: they are fully stored on your machine, completely private, and only accessible by you. No cloud database, no tracking, just pure local persistence."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How was this website built?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "KobSpin was built from the ground up utilizing the power of the Gemini 3.5 Flash model, coded collaboratively via the Antigravity AI coding agent, and is hosted on Netlify."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the privacy and tracking policy?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "To put it bluntly: we do NOT care about collecting your personal data. There is absolutely no background telemetry, zero advertising trackers, no cookies, and no tracking BS. What you spin and configure remains entirely your own business."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Who created KobSpin?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "KobSpin was created by Heikob! You can find me over at Twitch: twitch.tv/Heikob."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I nest multiple wheels together?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! KobSpin supports deep multi-layer nesting. You can configure an option on your parent wheel to load a linked sub-wheel (e.g. 5 Gifted -> 10 Gifted). Symmetrical flame transitions will play automatically, and the final nested winner will be displayed in a vertical timeline rundown when returning to the parent wheel."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is KobSpin free to use on stream?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! KobSpin is 100% free and open. The UI features responsive layout structures and high-performance HTML5 Canvas rendering, making it ideal for streamers to capture in OBS (via Window Capture) for giveaways, subathons, and interactive viewer punishments."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

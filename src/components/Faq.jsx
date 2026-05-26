@@ -20,7 +20,7 @@ export default function Faq({ onBack }) {
     {
       id: 'author',
       question: 'Who created KobSpin?',
-      answer: 'KobSpin was created by Heikob! You can find me streaming live and hang out with the community over at Twitch: twitch.tv/Heikob.'
+      answer: 'KobSpin was created by Heikob! You can find me over at Twitch: twitch.tv/Heikob.'
     },
     {
       id: 'nesting',
@@ -60,7 +60,7 @@ export default function Faq({ onBack }) {
       {/* Header section */}
       <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '32px' }}>
         <button onClick={onBack} className="btn btn-secondary">
-          ⬅️ Back to Dashboard
+          Back to Home
         </button>
       </div>
 
@@ -134,7 +134,7 @@ export default function Faq({ onBack }) {
                 }}>
                   {faq.id === 'author' ? (
                     <span>
-                      KobSpin was created by Heikob! You can find me streaming live and hang out with the community over at Twitch: <a href="https://twitch.tv/Heikob" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600 }}>twitch.tv/Heikob</a>.
+                      KobSpin was created by Heikob! You can find me over at Twitch: <a href="https://twitch.tv/Heikob" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600 }}>twitch.tv/Heikob</a>.
                     </span>
                   ) : faq.answer}
                 </div>

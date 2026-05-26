@@ -1,5 +1,7 @@
 
 
+import { createPortal } from 'react-dom';
+
 export default function ResetConfirmModal({
   isOpen,
   onClose,
@@ -7,19 +9,20 @@ export default function ResetConfirmModal({
 }) {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div style={{
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
+      width: '100vw',
+      height: '100dvh',
       backgroundColor: 'rgba(7, 5, 15, 0.8)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 110,
-      padding: '20px'
+      padding: '20px',
+      overflowY: 'auto'
     }} className="animate-overlay">
       <div className="glass-panel animate-scale-in" style={{
         maxWidth: '400px',
@@ -51,6 +54,7 @@ export default function ResetConfirmModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

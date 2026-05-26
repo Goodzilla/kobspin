@@ -76,7 +76,7 @@ const createDefaultWheel = (id, name) => {
   };
 };
 
-export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWheel, onResetToDefaults }) {
+export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWheel, onResetAllWheels, onOpenImport, onExportWheel }) {
   const handleCreateNew = () => {
     const name = prompt('Enter a name for your new wheel:', 'Daily Routine');
     if (!name || name.trim() === '') return;
@@ -122,26 +122,6 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
         alignItems: 'center' 
       }}>
         
-        {/* Sleek, Premium Geometrical Logo Mark */}
-        <div style={{
-          width: '72px',
-          height: '72px',
-          borderRadius: '18px',
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 100%)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '20px'
-        }}>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-accent)' }}>
-            <circle cx="12" cy="12" r="10" strokeOpacity="0.2"/>
-            <path d="M12 2a10 10 0 0 1 10 10" />
-            <path d="M12 12L19 5" />
-            <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-          </svg>
-        </div>
 
         <h1 style={{
           fontSize: '3.2rem',
@@ -155,149 +135,315 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', marginBottom: '20px', maxWidth: '520px', lineHeight: '1.5' }}>
           Create custom wheels with nested, unlockable options and variable weights.
         </p>
-        {onResetToDefaults && (
-          <button 
-            onClick={onResetToDefaults}
-            className="btn btn-secondary"
-            style={{ 
-              fontSize: '0.85rem', 
-              padding: '8px 16px', 
-              opacity: 0.85,
-              borderColor: 'rgba(139, 92, 246, 0.3)'
-            }}
-          >
-            🔄 Reset Wheelspins to Default
-          </button>
-        )}
       </header>
 
-      <h2 style={{
-        fontSize: '1.3rem',
-        marginBottom: '20px',
-        fontWeight: 650,
-        color: '#fff',
-        opacity: 0.9,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px'
-      }}>
-        🌀 Select or Create a Spinner Wheel
-      </h2>
-
-      <div className="wheels-grid" style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: '24px'
-      }}>
-        {/* Create Card */}
-        <div 
-          onClick={handleCreateNew}
-          className="glass-panel create-card" 
-          style={{
-            minHeight: '200px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            borderStyle: 'dashed',
-            borderWidth: '2px',
-            gap: '12px'
-          }}
-        >
-          <div style={{
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'rgba(139, 92, 246, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--color-accent)',
-            boxShadow: 'inset 0 0 10px rgba(139, 92, 246, 0.2)'
-          }}>
-            <svg 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
+      {/* Quick Actions Area */}
+      <section style={{ marginBottom: '48px', width: '100%' }}>
+        <h2 style={{
+          fontSize: '1rem',
+          marginBottom: '16px',
+          fontWeight: 600,
+          color: 'var(--color-text-secondary)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          opacity: 0.8
+        }}>
+          Quick Actions
+        </h2>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '24px'
+        }}>
+          {/* Create Card */}
+          <div 
+            onClick={handleCreateNew}
+            className="glass-panel create-card" 
+            style={{
+              minHeight: '160px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderStyle: 'dashed',
+              borderWidth: '2px',
+              gap: '12px'
+            }}
+          >
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              background: 'rgba(139, 92, 246, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--color-accent)',
+              boxShadow: 'inset 0 0 10px rgba(139, 92, 246, 0.2)'
+            }}>
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '600', color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>
+              Create a New Wheel
+            </span>
           </div>
-          <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '600', color: 'var(--color-text-primary)' }}>
-            Create a New Wheel
-          </span>
-        </div>
 
-        {/* Existing Wheels */}
-        {wheels.map((wheel) => {
-          const optCount = countTotalOptions(wheel.originalOptions);
-          return (
+          {/* Import Card */}
+          <div 
+            onClick={onOpenImport}
+            className="glass-panel create-card" 
+            style={{
+              minHeight: '160px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              borderStyle: 'dashed',
+              borderWidth: '2px',
+              gap: '12px',
+              borderColor: 'rgba(6, 182, 212, 0.4)'
+            }}
+          >
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              background: 'rgba(6, 182, 212, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--color-info)',
+              boxShadow: 'inset 0 0 10px rgba(6, 182, 212, 0.2)'
+            }}>
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </div>
+            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '600', color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>
+              Import a Wheel
+            </span>
+          </div>
+
+          {/* Reset Progress Card */}
+          {onResetAllWheels && (
             <div 
-              key={wheel.id} 
-              className="glass-panel wheel-card"
+              onClick={onResetAllWheels}
+              className="glass-panel create-card" 
               style={{
-                minHeight: '200px',
-                padding: '24px',
+                minHeight: '160px',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between',
-                position: 'relative',
-                overflow: 'hidden'
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                borderStyle: 'dashed',
+                borderWidth: '2px',
+                gap: '12px',
+                borderColor: 'rgba(168, 85, 247, 0.4)'
               }}
             >
-              <div>
-                <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                  {wheel.name}
-                </h3>
-                <span style={{
-                  fontSize: '0.8rem',
-                  background: 'rgba(139, 92, 246, 0.15)',
-                  color: '#c084fc',
-                  padding: '4px 10px',
-                  borderRadius: '20px',
-                  fontWeight: '600'
-                }}>
-                  {optCount} Options Total
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button 
-                  onClick={() => onSelectWheel(wheel.id)}
-                  className="btn btn-primary"
-                  style={{ flex: 1 }}
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                background: 'rgba(168, 85, 247, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-accent)',
+                boxShadow: 'inset 0 0 10px rgba(168, 85, 247, 0.2)'
+              }}>
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
                 >
-                  Play Wheel
-                </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm(`Are you sure you want to delete "${wheel.name}"?`)) {
-                      onDeleteWheel(wheel.id);
-                    }
-                  }}
-                  className="btn btn-secondary"
-                  style={{
-                    padding: '12px',
-                    borderColor: 'rgba(239, 68, 68, 0.2)',
-                    color: 'var(--color-danger)'
-                  }}
-                  title="Delete Wheel"
-                >
-                  🗑️
-                </button>
+                  <path d="M23 4v6h-6" />
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
               </div>
+              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: '600', color: 'var(--color-text-primary)', fontSize: '0.95rem' }}>
+                Reset All Wheels Progress
+              </span>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      </section>
+
+      {/* Your Saved Wheels Section */}
+      <section style={{ marginBottom: '40px', width: '100%' }}>
+        <h2 style={{
+          fontSize: '1.4rem',
+          marginBottom: '20px',
+          fontWeight: 700,
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          Your Saved Wheels
+        </h2>
+
+        {wheels.length === 0 ? (
+          <div className="glass-panel" style={{
+            padding: '48px',
+            textAlign: 'center',
+            color: 'var(--color-text-muted)',
+            borderStyle: 'dashed',
+            borderWidth: '1px',
+            borderRadius: '16px'
+          }}>
+            <span style={{ fontSize: '2rem', display: 'block', marginBottom: '12px' }}>🎡</span>
+            <span style={{ fontWeight: '500', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '6px' }}>No saved wheels yet</span>
+            <span style={{ fontSize: '0.85rem' }}>Use the actions above to create a new wheel or import an existing configuration JSON!</span>
+          </div>
+        ) : (
+          <div className="wheels-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: '24px'
+          }}>
+            {wheels.map((wheel) => {
+              const optCount = countTotalOptions(wheel.originalOptions);
+              return (
+                <div 
+                  key={wheel.id} 
+                  className="glass-panel wheel-card"
+                  style={{
+                    minHeight: '200px',
+                    padding: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div>
+                    <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#fff', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      {wheel.name}
+                    </h3>
+                    <span style={{
+                      fontSize: '0.8rem',
+                      background: 'rgba(139, 92, 246, 0.15)',
+                      color: '#c084fc',
+                      padding: '4px 10px',
+                      borderRadius: '20px',
+                      fontWeight: '600'
+                    }}>
+                      {optCount} Options Total
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                    <button 
+                      onClick={() => onSelectWheel(wheel.id)}
+                      className="btn btn-primary"
+                      style={{ flex: 1 }}
+                    >
+                      Play Wheel
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onExportWheel(wheel);
+                      }}
+                      className="btn btn-secondary"
+                      style={{
+                        padding: '12px',
+                        borderColor: 'rgba(6, 182, 212, 0.2)',
+                        color: 'var(--color-info)'
+                      }}
+                      title="Export Wheel JSON"
+                    >
+                      <svg 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="18" cy="5" r="3" />
+                        <circle cx="6" cy="12" r="3" />
+                        <circle cx="18" cy="19" r="3" />
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Are you sure you want to delete "${wheel.name}"?`)) {
+                          onDeleteWheel(wheel.id);
+                        }
+                      }}
+                      className="btn btn-secondary"
+                      style={{
+                        padding: '12px',
+                        borderColor: 'rgba(239, 68, 68, 0.2)',
+                        color: 'var(--color-danger)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      title="Delete Wheel"
+                    >
+                      <svg 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                        <line x1="10" y1="11" x2="10" y2="17" />
+                        <line x1="14" y1="11" x2="14" y2="17" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       {/* SEO Explainer Content for PageRank & Visibility */}
       <section style={{
@@ -315,12 +461,12 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
           gap: '24px'
         }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-accent)', marginBottom: '8px' }}>
-              🎮 Gamified Decision Making
+              🎮 Gamified Decisions
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
               Use nested options to build fallback rewards, progression paths, or twitch streaming punishment chains (like subathon challenges).
@@ -328,7 +474,7 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-info)', marginBottom: '8px' }}>
-              ⚖️ Weighted Probabilities
+              ⚖️ Weighted Odds
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
               Fine-tune the exact percentage odds for each segment by adjusting weight parameters. Perfect for fair raffle picker giveaways or balanced contest wheels.
@@ -336,6 +482,14 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-success)', marginBottom: '8px' }}>
+              📦 Lootbox Case Openers
+            </h3>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              Enable <strong>Lootbox Variant</strong> mode in Settings to experience a horizontal scrolling container opening simulator (CS:GO style) representing weighted odds.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: '1.2rem', color: 'var(--color-accent)', marginBottom: '8px', filter: 'hue-rotate(60deg)' }}>
               🔒 Save & Embed Offline
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>

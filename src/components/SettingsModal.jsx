@@ -4,6 +4,7 @@ import { getVibrantColor, generateId } from '../utils';
 export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
   const [wheelName, setWheelName] = useState(wheel.name);
   const [spinDuration, setSpinDuration] = useState(wheel.spinDuration || 10);
+  const [displayMode, setDisplayMode] = useState(wheel.displayMode || (wheel.isLootbox ? 'lootbox' : 'wheel'));
   const [options, setOptions] = useState(
     JSON.parse(JSON.stringify(wheel.originalOptions))
   );
@@ -17,6 +18,12 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
           // Keep currentLives synchronized with max lives when editing config
           if (fields.lives !== undefined) {
             updated.currentLives = fields.lives;
+          }
+          if (fields.shrouds !== undefined) {
+            updated.currentShrouds = fields.shrouds;
+          }
+          if (fields.shields !== undefined) {
+            updated.currentShields = fields.shields;
           }
           return updated;
         }
@@ -43,6 +50,10 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
               weight: Math.round(opt.weight * 0.8), // Default to 80% of parent weight
               lives: 2,
               currentLives: 2,
+              shrouds: 0,
+              currentShrouds: 0,
+              shields: 0,
+              currentShields: 0,
               color: getVibrantColor(options.length + depth + 1),
               subOption: null
             }
@@ -88,6 +99,10 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
       weight: 25,
       lives: 3,
       currentLives: 3,
+      shrouds: 0,
+      currentShrouds: 0,
+      shields: 0,
+      currentShields: 0,
       color: getVibrantColor(newIndex),
       subOption: null
     };
@@ -113,7 +128,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
       alert('Please add at least one option');
       return;
     }
-    onSave(wheelName.trim(), options, spinDuration);
+    onSave(wheelName.trim(), options, spinDuration, displayMode);
   };
 
   // Render a single option block and its children recursively
@@ -123,7 +138,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
         <div 
           className="glass-panel" 
           style={{
-            padding: '16px 20px',
+            padding: '20px 24px',
             marginLeft: `${depth * 24}px`,
             width: '620px',
             flexShrink: 0,
@@ -148,11 +163,11 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
 
           {/* Form Fields */}
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr',
-            gap: '12px',
-            alignItems: 'center'
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px'
           }}>
+            {/* Header / Title */}
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%' }}>
               <div 
                 style={{ 
@@ -165,128 +180,202 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
               />
               <span style={{ 
                 fontFamily: 'var(--font-heading)', 
-                fontWeight: 600, 
+                fontWeight: 700, 
                 fontSize: '0.85rem',
                 color: 'var(--color-text-secondary)',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
               }}>
                 {depth === 0 ? 'Top-Level Option' : `Unlock Option Level ${depth}`}
               </span>
             </div>
 
+            {/* Label input */}
             <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+                Option Label
+                <span className="info-tooltip" data-tooltip="The text that is displayed on the wheel slice or container loot card.">?</span>
+              </label>
               <input
                 type="text"
                 value={opt.name}
                 onChange={(e) => updateOption(opt.id, { name: e.target.value })}
                 className="form-input"
                 placeholder="Option Label (e.g. Pizza 🍕)"
-                style={{ width: '100%' }}
+                style={{ width: '100%', fontSize: '1rem', padding: '10px 14px' }}
               />
             </div>
 
-            {/* Option Type and Target Wheel Selection */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontSize: '0.75rem' }}>Option Type</label>
-                <select
-                  value={opt.linkedWheelId ? 'link' : 'standard'}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === 'standard') {
-                      updateOption(opt.id, { linkedWheelId: null });
-                    } else {
-                      const otherWheels = wheels.filter(w => w.id !== wheel.id);
-                      const defaultTarget = otherWheels[0];
-                      updateOption(opt.id, {
-                        linkedWheelId: defaultTarget ? defaultTarget.id : '',
-                        name: opt.name.startsWith('Option') && defaultTarget ? defaultTarget.name : opt.name
-                      });
-                    }
-                  }}
-                  className="form-input"
-                  style={{ background: 'var(--bg-secondary)', color: '#fff', cursor: 'pointer', width: '100%' }}
-                >
-                  <option value="standard">Standard Option</option>
-                  <option value="link">Link to Another Wheel 🌀</option>
-                </select>
-              </div>
+            {/* Content layout splitting: Left column (Weight & Type), Right column (Durability & Overlays) */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1.1fr 1.3fr',
+              gap: '24px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+              paddingTop: '14px'
+            }}>
+              
+              {/* Left Column: Core Settings */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Core Settings
+                </h4>
 
-              {opt.linkedWheelId !== undefined && opt.linkedWheelId !== null && (
                 <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label" style={{ fontSize: '0.75rem' }}>Target Wheel</label>
+                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    Weight
+                    <span className="info-tooltip" data-tooltip="Determines slice size and probability of landing on this option. Higher weights mean a higher chance of landing.">?</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={opt.weight}
+                    onChange={(e) => updateOption(opt.id, { weight: Math.max(1, parseInt(e.target.value) || 1) })}
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Option Type</label>
                   <select
-                    value={opt.linkedWheelId}
+                    value={opt.linkedWheelId ? 'link' : 'standard'}
                     onChange={(e) => {
-                      const targetId = e.target.value;
-                      const targetWheel = wheels.find(w => w.id === targetId);
-                      updateOption(opt.id, {
-                        linkedWheelId: targetId,
-                        name: targetWheel ? targetWheel.name : opt.name
-                      });
+                      const val = e.target.value;
+                      if (val === 'standard') {
+                        updateOption(opt.id, { linkedWheelId: null });
+                      } else {
+                        const otherWheels = wheels.filter(w => w.id !== wheel.id);
+                        const defaultTarget = otherWheels[0];
+                        updateOption(opt.id, {
+                          linkedWheelId: defaultTarget ? defaultTarget.id : '',
+                          name: opt.name.startsWith('Option') && defaultTarget ? defaultTarget.name : opt.name
+                        });
+                      }
                     }}
                     className="form-input"
                     style={{ background: 'var(--bg-secondary)', color: '#fff', cursor: 'pointer', width: '100%' }}
                   >
-                    <option value="" disabled>-- Select Wheel --</option>
-                    {wheels.filter(w => w.id !== wheel.id).length === 0 ? (
-                      <option disabled>No other wheels created</option>
-                    ) : (
-                      wheels
-                        .filter(w => w.id !== wheel.id)
-                        .map(w => (
-                          <option key={w.id} value={w.id}>{w.name}</option>
-                        ))
-                    )}
+                    <option value="standard">Standard Option</option>
+                    <option value="link">Link to Another Wheel 🌀</option>
                   </select>
                 </div>
-              )}
-            </div>
 
-            <div className="form-row" style={{ gap: '12px', alignItems: 'flex-end' }}>
-              <div className="form-group" style={{ marginBottom: 0, flex: 2 }}>
-                <label className="form-label">Weight (Chance)</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={opt.weight}
-                  onChange={(e) => updateOption(opt.id, { weight: Math.max(1, parseInt(e.target.value) || 1) })}
-                  className="form-input"
-                />
+                {opt.linkedWheelId !== undefined && opt.linkedWheelId !== null && (
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Target Wheel</label>
+                    <select
+                      value={opt.linkedWheelId}
+                      onChange={(e) => {
+                        const targetId = e.target.value;
+                        const targetWheel = wheels.find(w => w.id === targetId);
+                        updateOption(opt.id, {
+                          linkedWheelId: targetId,
+                          name: targetWheel ? targetWheel.name : opt.name
+                        });
+                      }}
+                      className="form-input"
+                      style={{ background: 'var(--bg-secondary)', color: '#fff', cursor: 'pointer', width: '100%' }}
+                    >
+                      <option value="" disabled>-- Select Wheel --</option>
+                      {wheels.filter(w => w.id !== wheel.id).length === 0 ? (
+                        <option disabled>No other wheels created</option>
+                      ) : (
+                        wheels
+                          .filter(w => w.id !== wheel.id)
+                          .map(w => (
+                            <option key={w.id} value={w.id}>{w.name}</option>
+                          ))
+                      )}
+                    </select>
+                  </div>
+                )}
               </div>
-              <div className="form-group" style={{ marginBottom: 0, flex: 2 }}>
-                <label className="form-label">Lives (Hearts)</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={opt.lives === 0 ? '' : opt.lives}
-                  disabled={opt.lives === 0}
-                  placeholder="∞"
-                  onChange={(e) => updateOption(opt.id, { lives: Math.max(1, parseInt(e.target.value) || 1) })}
-                  className="form-input"
-                />
+
+              {/* Right Column: Durability & Overlays */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', borderLeft: '1px solid rgba(255, 255, 255, 0.05)', paddingLeft: '20px' }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Durability & Overlays
+                </h4>
+
+                {/* Durability / Lives Group */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+                    Durability (Lives)
+                    <span className="info-tooltip" data-tooltip="How many times the wheel can land on this option before it shatters and is removed. Turn on 'Unlimited' to keep it forever.">?</span>
+                  </label>
+                  
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="number"
+                        min="1"
+                        value={opt.lives === 0 ? '' : opt.lives}
+                        disabled={opt.lives === 0}
+                        placeholder={opt.lives === 0 ? '∞' : 'Number of lives'}
+                        onChange={(e) => updateOption(opt.id, { lives: Math.max(1, parseInt(e.target.value) || 1) })}
+                        className="form-input"
+                        style={{ width: '100%' }}
+                      />
+                    </div>
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                      <input
+                        type="checkbox"
+                        id={`unlimited-${opt.id}`}
+                        checked={opt.lives === 0}
+                        onChange={(e) => {
+                          const isUnlimited = e.target.checked;
+                          updateOption(opt.id, {
+                            lives: isUnlimited ? 0 : 3,
+                            currentLives: isUnlimited ? 0 : 3
+                          });
+                        }}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                      />
+                      <label 
+                        htmlFor={`unlimited-${opt.id}`} 
+                        style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', cursor: 'pointer', userSelect: 'none' }}
+                      >
+                        Unlimited
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overlays Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '4px' }}>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      Shrouds
+                      <span className="info-tooltip" data-tooltip="Hides this option under a dark mist on the wheel. Each spin that lands on it removes one shroud layer until revealed.">?</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={opt.shrouds || 0}
+                      onChange={(e) => updateOption(opt.id, { shrouds: Math.max(0, parseInt(e.target.value) || 0) })}
+                      className="form-input"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      Shields
+                      <span className="info-tooltip" data-tooltip="Encloses this option in a glassy shield. The option is visible, but the shield must be shattered (by landing on it) before it can lose lives.">?</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={opt.shields || 0}
+                      onChange={(e) => updateOption(opt.id, { shields: Math.max(0, parseInt(e.target.value) || 0) })}
+                      className="form-input"
+                      style={{ width: '100%' }}
+                    />
+                  </div>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '42px', paddingBottom: '8px' }}>
-                <input
-                  type="checkbox"
-                  id={`unlimited-${opt.id}`}
-                  checked={opt.lives === 0}
-                  onChange={(e) => {
-                    const isUnlimited = e.target.checked;
-                    updateOption(opt.id, {
-                      lives: isUnlimited ? 0 : 3,
-                      currentLives: isUnlimited ? 0 : 3
-                    });
-                  }}
-                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                />
-                <label 
-                  htmlFor={`unlimited-${opt.id}`} 
-                  style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', cursor: 'pointer', userSelect: 'none' }}
-                >
-                  Unlimited
-                </label>
-              </div>
+
             </div>
 
             {/* Actions for this specific node */}
@@ -295,12 +384,12 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
               justifyContent: 'space-between', 
               marginTop: '8px', 
               borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-              paddingTop: '10px',
+              paddingTop: '12px',
               alignItems: 'center'
             }}>
               {opt.lives === 0 ? (
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-success)', fontWeight: 600 }}>
-                  🛡️ Permanent option (unlimited lives)
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-success)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  ♾️ Permanent option (unlimited lives)
                 </span>
               ) : !opt.subOption ? (
                 <button
@@ -308,7 +397,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
                   className="btn btn-secondary"
                   style={{ fontSize: '0.8rem', padding: '6px 12px', borderColor: 'rgba(168, 85, 247, 0.2)' }}
                 >
-                  ➕ Add Next Unlock
+                  Add Next Unlock
                 </button>
               ) : (
                 <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center' }}>
@@ -326,7 +415,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
                   borderColor: 'rgba(239, 68, 68, 0.1)' 
                 }}
               >
-                🗑️ Delete
+                Delete
               </button>
             </div>
           </div>
@@ -343,14 +432,15 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
       position: 'fixed',
       top: 0,
       left: 0,
-      width: '100%',
-      height: '100%',
+      width: '100vw',
+      height: '100dvh',
       backgroundColor: 'rgba(7, 5, 15, 0.85)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 100,
-      padding: '20px'
+      padding: '20px',
+      overflowY: 'auto'
     }} className="animate-overlay">
       <div 
         className="glass-panel animate-scale-in" 
@@ -397,30 +487,182 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
           flexDirection: 'column',
           gap: '24px'
         }}>
-          {/* Wheel Name & Spin Duration */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Wheel Name</label>
-              <input
-                type="text"
-                value={wheelName}
-                onChange={(e) => setWheelName(e.target.value)}
-                className="form-input"
-                placeholder="e.g. My Custom Wheel"
-                style={{ fontSize: '1.1rem', fontWeight: 600 }}
-              />
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            marginBottom: '10px'
+          }}>
+            {/* Top row: Name & Duration */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '2fr 1fr',
+              gap: '20px',
+              alignItems: 'start',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              padding: '24px',
+            }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+                  Wheel Name
+                </label>
+                <input
+                  type="text"
+                  value={wheelName}
+                  onChange={(e) => setWheelName(e.target.value)}
+                  className="form-input"
+                  placeholder="e.g. My Custom Wheel"
+                  style={{ fontSize: '1rem', padding: '12px 16px', borderRadius: '10px' }}
+                />
+              </div>
+              
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+                  Spin Duration (sec)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={spinDuration}
+                  onChange={(e) => setSpinDuration(Math.max(1, Math.min(60, parseInt(e.target.value) || 1)))}
+                  className="form-input"
+                  style={{ fontSize: '1rem', padding: '12px 16px', borderRadius: '10px' }}
+                />
+              </div>
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Spin duration (sec)</label>
-              <input
-                type="number"
-                min="1"
-                max="60"
-                value={spinDuration}
-                onChange={(e) => setSpinDuration(Math.max(1, Math.min(60, parseInt(e.target.value) || 1)))}
-                className="form-input"
-                style={{ fontSize: '1.1rem', fontWeight: 600 }}
-              />
+
+            {/* Presentation Display Mode Selector */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                Display Presentation Mode
+                <span className="info-tooltip tooltip-bottom-left" data-tooltip="Switch between standard circular spinner wheel, CS:GO-style horizontal container opening ticker, or 2D Horse Race.">?</span>
+              </span>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '12px',
+                width: '100%'
+              }}>
+                {/* 1. Wheel Spinner Mode */}
+                <div 
+                  onClick={() => setDisplayMode('wheel')}
+                  className="glass-panel"
+                  style={{
+                    padding: '16px 20px',
+                    cursor: 'pointer',
+                    borderRadius: '14px',
+                    border: displayMode === 'wheel' ? '2px solid var(--color-accent)' : '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor: displayMode === 'wheel' ? 'rgba(168, 85, 247, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                    boxShadow: displayMode === 'wheel' ? '0 0 16px rgba(168, 85, 247, 0.2)' : 'none',
+                    transition: 'all 0.25s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    userSelect: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (displayMode !== 'wheel') {
+                      e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.3)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (displayMode !== 'wheel') {
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1.3rem' }}>🎡</span>
+                    <span style={{ fontSize: '1.02rem', fontWeight: 700, color: '#fff' }}>Wheel Spinner</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                    Standard circular rotating wheel spinner with pointer ticks and sector color slices.
+                  </p>
+                </div>
+
+                {/* 2. Lootbox Opener Mode */}
+                <div 
+                  onClick={() => setDisplayMode('lootbox')}
+                  className="glass-panel"
+                  style={{
+                    padding: '16px 20px',
+                    cursor: 'pointer',
+                    borderRadius: '14px',
+                    border: displayMode === 'lootbox' ? '2px solid #eab308' : '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor: displayMode === 'lootbox' ? 'rgba(234, 179, 8, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                    boxShadow: displayMode === 'lootbox' ? '0 0 16px rgba(234, 179, 8, 0.2)' : 'none',
+                    transition: 'all 0.25s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    userSelect: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (displayMode !== 'lootbox') {
+                      e.currentTarget.style.borderColor = 'rgba(234, 179, 8, 0.3)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (displayMode !== 'lootbox') {
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1.3rem' }}>📦</span>
+                    <span style={{ fontSize: '1.02rem', fontWeight: 700, color: '#fff' }}>Lootbox Opener</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                    Counter-Strike style horizontal case openings with crate shake animations and card highlights.
+                  </p>
+                </div>
+
+                {/* 3. Horse Race Mode */}
+                <div 
+                  onClick={() => setDisplayMode('race')}
+                  className="glass-panel"
+                  style={{
+                    padding: '16px 20px',
+                    cursor: 'pointer',
+                    borderRadius: '14px',
+                    border: displayMode === 'race' ? '2px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
+                    backgroundColor: displayMode === 'race' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                    boxShadow: displayMode === 'race' ? '0 0 16px rgba(16, 185, 129, 0.2)' : 'none',
+                    transition: 'all 0.25s ease',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    userSelect: 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (displayMode !== 'race') {
+                      e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (displayMode !== 'race') {
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1.3rem' }}>🐎</span>
+                    <span style={{ fontSize: '1.02rem', fontWeight: 700, color: '#fff' }}>Horse Race</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                    2D horizontal horse race! Each option runs matching their weighted odds. First to cross wins.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -446,7 +688,7 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
                 padding: '12px'
               }}
             >
-              ➕ Add New Top-Level Slice
+              Add New Top-Level Slice
             </button>
           </div>
         </div>
