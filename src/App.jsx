@@ -4,7 +4,7 @@ import WheelSpin from './components/WheelSpin';
 import SettingsModal from './components/SettingsModal';
 import Faq from './components/Faq';
 import History from './components/History';
-import { getVibrantColor, generateId } from './utils';
+import { getVibrantColor } from './utils';
 import { audio } from './audio';
 
 
@@ -243,53 +243,7 @@ const getPseudoRandom = (seed) => {
   return x - Math.floor(x);
 };
 
-// Self-healing sanitizers for old/corrupted data structures
-const healOption = (opt, index = 0) => {
-  if (!opt) return null;
-  opt.id = opt.id || generateId();
-  opt.name = opt.name !== undefined ? opt.name : "Option";
-  opt.weight = opt.weight !== undefined ? opt.weight : 25;
-  opt.lives = opt.lives !== undefined ? opt.lives : 3;
-  opt.currentLives = opt.currentLives !== undefined ? opt.currentLives : opt.lives;
-  opt.shrouds = opt.shrouds !== undefined ? opt.shrouds : 0;
-  opt.currentShrouds = opt.currentShrouds !== undefined ? opt.currentShrouds : opt.shrouds;
-  opt.shields = opt.shields !== undefined ? opt.shields : 0;
-  opt.currentShields = opt.currentShields !== undefined ? opt.currentShields : opt.shields;
-  if (!opt.color) {
-    opt.color = getVibrantColor(index || Math.floor(Math.random() * 12));
-  }
-  if (opt.subOption && typeof opt.subOption === 'object') {
-    opt.subOption = healOption(opt.subOption, index + 1);
-  } else {
-    opt.subOption = null;
-  }
-  return opt;
-};
 
-const healWheel = (wheel) => {
-  if (!wheel) return null;
-  wheel.id = wheel.id || 'wheel-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
-  wheel.name = wheel.name || 'Unnamed Wheel';
-  wheel.spinDuration = wheel.spinDuration !== undefined ? wheel.spinDuration : 10;
-  wheel.isLootbox = wheel.isLootbox !== undefined ? !!wheel.isLootbox : false;
-  if (!wheel.displayMode) {
-    wheel.displayMode = wheel.isLootbox ? 'lootbox' : 'wheel';
-  }
-  
-  if (wheel.originalOptions) {
-    wheel.originalOptions = wheel.originalOptions.map((opt, idx) => healOption(opt, idx)).filter(Boolean);
-  } else {
-    wheel.originalOptions = [];
-  }
-  
-  if (wheel.activeOptions && wheel.activeOptions.length > 0) {
-    wheel.activeOptions = wheel.activeOptions.map((opt, idx) => healOption(opt, idx)).filter(Boolean);
-  } else {
-    wheel.activeOptions = JSON.parse(JSON.stringify(wheel.originalOptions));
-  }
-  
-  return wheel;
-};
 
 export default function App() {
   const [wheels, setWheels] = useState(() => {
@@ -298,10 +252,7 @@ export default function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          const healed = parsed.map(healWheel).filter(Boolean);
-          // Persist the self-healed wheels structure
-          localStorage.setItem('wheelspin_wheels', JSON.stringify(healed));
-          return healed;
+          return parsed;
         }
         return getDefaultWheels();
       } catch (e) {
@@ -310,7 +261,6 @@ export default function App() {
       }
     } else {
       const defaults = getDefaultWheels();
-      localStorage.setItem('wheelspin_wheels', JSON.stringify(defaults));
       return defaults;
     }
   });
@@ -355,10 +305,17 @@ export default function App() {
     }
   }, [currentView, activeWheelId, wheels]);
 
-  // Save to localStorage when wheels change
+  // Auto-persist wheels to localStorage on every state change.
+  // This is the single source of truth for persistence — ensures durability
+  // changes (lives, shields, shrouds) are NEVER lost regardless of which
+  // code path updated the wheels state.
+  useEffect(() => {
+    localStorage.setItem('wheelspin_wheels', JSON.stringify(wheels));
+  }, [wheels]);
+
+  // Convenience wrapper: updates wheels state (auto-persisted by the effect above)
   const saveWheels = (updatedWheels) => {
     setWheels(updatedWheels);
-    localStorage.setItem('wheelspin_wheels', JSON.stringify(updatedWheels));
   };
 
   const addHistoryItem = (wheel, winner, eventText, details = {}) => {
@@ -385,11 +342,17 @@ export default function App() {
   };
 
   const handleCreateWheel = (newWheel) => {
-    const healed = healWheel(newWheel);
-    if (!healed) return;
-    const updated = [healed, ...wheels];
+    if (!newWheel) return;
+    // Ensure required fields exist for imported/new wheels
+    newWheel.id = newWheel.id || 'wheel-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+    newWheel.name = newWheel.name || 'Unnamed Wheel';
+    newWheel.spinDuration = newWheel.spinDuration !== undefined ? newWheel.spinDuration : 10;
+    newWheel.displayMode = newWheel.displayMode || (newWheel.isLootbox ? 'lootbox' : 'wheel');
+    newWheel.originalOptions = newWheel.originalOptions || [];
+    newWheel.activeOptions = newWheel.activeOptions || [];
+    const updated = [newWheel, ...wheels];
     saveWheels(updated);
-    setActiveWheelId(healed.id);
+    setActiveWheelId(newWheel.id);
     setCurrentView('wheel');
   };
 
@@ -575,49 +538,51 @@ export default function App() {
       addHistoryItem(activeWheel, winner, eventText, historyDetails);
     }
 
-    const updated = wheels.map(w => {
-      if (w.id !== activeWheelId) return w;
+    setWheels(prevWheels => {
+      const updated = prevWheels.map(w => {
+        if (w.id !== activeWheelId) return w;
 
-      const newActive = w.activeOptions.map(opt => {
-        if (opt.id === winner.id) {
-          console.log('[APP] Found matching opt:', opt);
-          // Shrouds decrement first
-          if (opt.currentShrouds > 0) {
-            return { ...opt, currentShrouds: opt.currentShrouds - 1 };
+        const newActive = w.activeOptions.map(opt => {
+          if (opt.id === winner.id) {
+            console.log('[APP] Found matching opt:', opt);
+            // Shrouds decrement first
+            if (opt.currentShrouds > 0) {
+              return { ...opt, currentShrouds: opt.currentShrouds - 1 };
+            }
+            // Shields decrement second
+            if (opt.currentShields > 0) {
+              return { ...opt, currentShields: opt.currentShields - 1 };
+            }
+            // Unlimited lives check: lives === 0 means permanent, do not decrement or remove
+            if (opt.lives === 0) {
+              return opt;
+            }
+            if (opt.currentLives > 1) {
+              // Decrement life
+              return { ...opt, currentLives: opt.currentLives - 1 };
+            }
+            // Out of lives: replace with sub-option
+            if (opt.subOption) {
+              const nextOpt = { ...opt.subOption };
+              nextOpt.currentLives = nextOpt.lives; // Reset child's live counter
+              nextOpt.currentShrouds = nextOpt.shrouds || 0; // Reset child's shroud counter
+              nextOpt.currentShields = nextOpt.shields || 0; // Reset child's shield counter
+              console.log('[APP] Replacing with subOption:', nextOpt);
+              return nextOpt;
+            }
+            // Depleted completely: remove
+            console.log('[APP] Depleted completely, removing');
+            return null;
           }
-          // Shields decrement second
-          if (opt.currentShields > 0) {
-            return { ...opt, currentShields: opt.currentShields - 1 };
-          }
-          // Unlimited lives check: lives === 0 means permanent, do not decrement or remove
-          if (opt.lives === 0) {
-            return opt;
-          }
-          if (opt.currentLives > 1) {
-            // Decrement life
-            return { ...opt, currentLives: opt.currentLives - 1 };
-          }
-          // Out of lives: replace with sub-option
-          if (opt.subOption) {
-            const nextOpt = { ...opt.subOption };
-            nextOpt.currentLives = nextOpt.lives; // Reset child's live counter
-            nextOpt.currentShrouds = nextOpt.shrouds || 0; // Reset child's shroud counter
-            nextOpt.currentShields = nextOpt.shields || 0; // Reset child's shield counter
-            console.log('[APP] Replacing with subOption:', nextOpt);
-            return nextOpt;
-          }
-          // Depleted completely: remove
-          console.log('[APP] Depleted completely, removing');
-          return null;
-        }
-        return opt;
-      }).filter(Boolean);
+          return opt;
+        }).filter(Boolean);
 
-      return { ...w, activeOptions: newActive };
+        return { ...w, activeOptions: newActive };
+      });
+
+      console.log('[APP] Updated wheels activeOptions:', updated.find(w => w.id === activeWheelId)?.activeOptions);
+      return updated;
     });
-
-    console.log('[APP] Updated wheels activeOptions:', updated.find(w => w.id === activeWheelId)?.activeOptions);
-    saveWheels(updated);
 
     // If we are in a nested wheel run, return to top-level starting wheel
     if (wheelStack.length > 0) {
@@ -663,7 +628,7 @@ export default function App() {
   };
 
   const handleSaveSettings = (name, originalOptions, spinDuration, displayModeOrIsLootbox) => {
-    const healedOptions = originalOptions.map((opt, idx) => healOption(opt, idx)).filter(Boolean);
+    const savedOptions = originalOptions;
 
     // Detect if we were passed a boolean (legacy/import) or string (displayMode)
     let displayMode = 'wheel';
@@ -673,22 +638,26 @@ export default function App() {
       displayMode = displayModeOrIsLootbox;
     }
 
-    // Fingerprint options by id+weight+lives+shrouds+shields to detect structural changes
-    const optionFingerprint = (opts) =>
-      opts.map(o => `${o.id}:${o.weight}:${o.lives}:${o.shrouds || 0}:${o.shields || 0}`).join('|');
+    // Fingerprint options recursively (including sub-options) to detect structural changes
+    const fingerprintOption = (o) => {
+      let fp = `${o.id}:${o.weight}:${o.lives}:${o.shrouds || 0}:${o.shields || 0}`;
+      if (o.subOption) fp += `>(${fingerprintOption(o.subOption)})`;
+      return fp;
+    };
+    const optionFingerprint = (opts) => opts.map(fingerprintOption).join('|');
 
     const updated = wheels.map(w => {
       if (w.id !== activeWheelId) return w;
 
       // Check if the options themselves changed structurally
       const prevFingerprint = optionFingerprint(w.originalOptions || []);
-      const nextFingerprint = optionFingerprint(healedOptions);
+      const nextFingerprint = optionFingerprint(savedOptions);
       const optionsChanged = prevFingerprint !== nextFingerprint;
 
       let newActiveOptions;
       if (optionsChanged) {
         // Options actually changed: rebuild activeOptions from scratch and reset lives
-        const clonedActive = JSON.parse(JSON.stringify(healedOptions));
+        const clonedActive = JSON.parse(JSON.stringify(savedOptions));
         const resetLives = (opt) => {
           if (!opt) return;
           opt.currentLives = opt.lives;
@@ -701,13 +670,13 @@ export default function App() {
       } else {
         // Only cosmetic/display settings changed (name, spinDuration, isLootbox, etc.)
         // Preserve existing activeOptions to keep current lives/shrouds/shields state
-        newActiveOptions = w.activeOptions || JSON.parse(JSON.stringify(healedOptions));
+        newActiveOptions = w.activeOptions || JSON.parse(JSON.stringify(savedOptions));
       }
 
       return {
         ...w,
         name,
-        originalOptions: healedOptions,
+        originalOptions: savedOptions,
         activeOptions: newActiveOptions,
         spinDuration: spinDuration || 10,
         isLootbox: displayMode === 'lootbox',

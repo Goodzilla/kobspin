@@ -117,6 +117,7 @@ export default function WheelSpin({
   const bannerTextRef = useRef(null);
   const bannerStartRef = useRef(0);
   const onSpinEndCalledRef = useRef(false);
+  const onSpinEndRef = useRef(onSpinEnd);
   const spinStartTimeRef = useRef(0);
   const spinDurationRef = useRef(10000);
   const startAngleRef = useRef(0);
@@ -212,6 +213,11 @@ export default function WheelSpin({
   useEffect(() => {
     winnerRef.current = winner;
   }, [winner]);
+
+  // Keep onSpinEnd ref in sync so animate loop always uses the latest callback
+  useEffect(() => {
+    onSpinEndRef.current = onSpinEnd;
+  }, [onSpinEnd]);
 
   useEffect(() => {
     activeOptionsRef.current = activeOptions;
@@ -2370,7 +2376,7 @@ export default function WheelSpin({
         const hasSubOption = currentWinner && currentWinner.subOption;
 
         if (currentWinner && !onSpinEndCalledRef.current) {
-          onSpinEnd(currentWinner);
+          onSpinEndRef.current(currentWinner);
           onSpinEndCalledRef.current = true;
         }
 
@@ -2642,14 +2648,14 @@ export default function WheelSpin({
         }
       } else {
         if (!onSpinEndCalledRef.current) {
-          onSpinEnd(winner);
+          onSpinEndRef.current(winner);
           onSpinEndCalledRef.current = true;
         }
         setWinner(null);
       }
     } else {
       if (!onSpinEndCalledRef.current) {
-        onSpinEnd(winner);
+        onSpinEndRef.current(winner);
         onSpinEndCalledRef.current = true;
       }
       setWinner(null);
