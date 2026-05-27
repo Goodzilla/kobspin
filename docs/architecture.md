@@ -1,6 +1,6 @@
 # KobSpin Code Architecture
 
-This document outlines the design patterns, component relationships, data flows, and canvas animation systems of the KobSpin application.
+This document outlines the modern, decoupled React architecture of KobSpin, explaining component relationships, design patterns, rendering systems, and data flows.
 
 ---
 
@@ -13,99 +13,135 @@ wheelspin-app/
 ├── public/                    # Static asset directory (e.g. sounds, manifest)
 ├── src/
 │   ├── assets/                # App-wide media, icons, and logos
-│   ├── components/            # UI components
-│   │   ├── Home.jsx           # Main starting view and wheel listing
-│   │   ├── ResetConfirmModal.jsx # Wheel reset confirmation overlay
-│   │   ├── SettingsModal.jsx  # Configuration overlay (life bounds, names, sub-options)
-│   │   ├── WheelSpin.jsx      # High-performance HTML5 Canvas wheel renderer
-│   │   └── WinnerModal.jsx    # Landed option announcement dialog
-│   ├── utils/
-│   │   └── wheelAnimationUtils.js # Core mathematical easing and crack/shard physics formulas
-│   ├── App.css                # Global layouts, badges, panels, animations
-│   ├── App.jsx                # Main orchestrator component, view router, localStorage syncing
-│   ├── audio.js               # Sound effect player engine
+│   ├── audio/                 # Modular sound effect engine
+│   │   ├── audioContext.js    # Decoupled web audio context helper
+│   │   ├── uiAudio.js         # Sound effects for UI interactions
+│   │   ├── wheelAudio.js      # Wheel ticking sound effects
+│   │   ├── lootboxAudio.js    # Lootbox case tick sound effects
+│   │   ├── raceAudio.js       # Horse racing sounds (gallops, bells)
+│   │   └── index.js           # Consolidated audio playback facade
+│   ├── components/            # UI components (Presentation layer)
+│   │   ├── ui/                # Glassmorphic and form UI primitives
+│   │   ├── AppLayout.jsx      # Main layout orchestrator
+│   │   ├── Home.jsx           # Dashboard and wheel selector
+│   │   ├── Faq.jsx            # FAQ section page
+│   │   ├── History.jsx        # Spin history logs view
+│   │   ├── OnboardingModal.jsx# Onboarding tour modal
+│   │   ├── SettingsModal.jsx  # Configuration settings overlay
+│   │   ├── WinnerModal.jsx    # Winner announcement dialog
+│   │   ├── WheelView.jsx      # Specialized view for classic wheel
+│   │   ├── LootboxView.jsx    # Specialized view for CS:GO lootbox
+│   │   └── HorseRaceView.jsx  # Specialized view for horse race
+│   ├── context/               # Global states (State Management layer)
+│   │   ├── WheelContext.jsx   # Wheels configurations CRUD & persistence
+│   │   ├── NavigationContext.jsx # App navigation and modal states
+│   │   └── HistoryContext.jsx # Spin history log data
+│   ├── hooks/                 # Scoped custom hooks (Logic layer)
+│   │   ├── useWheels.js       # CRUD operations wrapper
+│   │   ├── useActiveWheel.js  # Active wheel play logic, decrements & unlocks
+│   │   ├── useAnimationLoop.js# requestAnimationFrame game loop helper
+│   │   ├── useNavigation.js   # Navigation hooks wrapper
+│   │   └── useHistory.js      # Spin history hooks wrapper
+│   ├── renderers/             # Decoupled Canvas Graphics (Draw layer)
+│   │   ├── wheelRenderer.js   # Classic wheel canvas painting
+│   │   ├── lootboxRenderer.js # Conveyor ticker case opening graphics
+│   │   ├── horseRaceRenderer.js # Racer tracks and start lines
+│   │   ├── horseRenderer.js   # Arched majestic vector horse renderer
+│   │   └── particleRenderer.js # Shatter shards, sparks, confetti
+│   ├── utils/                 # Modular utility scripts
+│   │   ├── sanitization.js    # Data healing & backfilling for legacy schemas
+│   │   ├── math.js            # Geometric & random calculations
+│   │   ├── colors.js          # Color generators and HSL schemes
+│   │   ├── defaultWheels.js   # Factory presets configuration builder
+│   │   └── animation.js       # Easing curve functions
+│   ├── App.jsx                # App shell context wrapper
 │   ├── index.css              # Custom styling variables, design system tokens
-│   ├── main.jsx               # React virtual DOM bootstrap mount
-│   └── utils.js               # Visual color helpers
-├── index.html                 # Main template structure
-├── package.json               # Dependencies and scripts
-└── vite.config.js             # Bundler configs
+│   └── main.jsx               # React DOM bootstrapper
 ```
 
 ---
 
-## 🏛️ Component Hierarchy & Routing
+## 🏛️ Component Hierarchy & Contexts
 
-The layout routes views dynamically via internal component state in [App.jsx](file:///C:/Users/Ronan/.gemini/antigravity/scratch/wheelspin-app/src/App.jsx):
+KobSpin separates application state from visual components. View routing and wheel configuration states are distributed using React Context providers wrapped in `App.jsx`:
 
 ```mermaid
 graph TD
-  App[App.jsx] --> Home[Home.jsx]
-  App --> WheelSpin[WheelSpin.jsx]
-  App --> SettingsModal[SettingsModal.jsx]
-  
-  WheelSpin --> WinnerModal[WinnerModal.jsx]
-  WheelSpin --> ResetConfirmModal[ResetConfirmModal.jsx]
+  App[App.jsx] --> WheelContext[WheelContext]
+  App --> NavigationContext[NavigationContext]
+  App --> HistoryContext[HistoryContext]
+
+  WheelContext --> AppLayout[AppLayout.jsx]
+  NavigationContext --> AppLayout
+  HistoryContext --> AppLayout
+
+  AppLayout --> Home[Home.jsx]
+  AppLayout --> FAQ[Faq.jsx]
+  AppLayout --> History[History.jsx]
+
+  AppLayout --> WheelView[WheelView.jsx]
+  AppLayout --> LootboxView[LootboxView.jsx]
+  AppLayout --> HorseRaceView[HorseRaceView.jsx]
+
+  WheelView --> WinnerModal[WinnerModal.jsx]
+  LootboxView --> WinnerModal
+  HorseRaceView --> WinnerModal
 ```
 
-### 1. Main Orchestrator (`App.jsx`)
-* Manages global React states, including configuration list of all custom wheels (`wheels`), active wheel selection (`activeWheelId`), and view state (`home` vs `wheel`).
-* Automatically initializes fallback presets if local storage database is blank.
-* Listens for changes to `wheels` and persists updates to standard `localStorage`.
-* Implements `handleSpinEnd()` to handle option lives decreases, substituting sub-options, and complete slice removals.
+### 1. State Management Layer (Contexts)
+* **`WheelContext`**: Handles operations to create, edit, or delete custom configurations, and saves/loads state dynamically from `localStorage`.
+* **`NavigationContext`**: Controls the active view route (`home`, `faq`, `history`, `wheel`), onboarding tour steps, and triggers transition overlays (like screen-wide flame animations).
+* **`HistoryContext`**: Manages the persistent log list of previous spin winners and nested runs.
 
-### 2. Home Dashboard (`Home.jsx`)
-* Renders the landing screen listing available wheels.
-* Provides triggers to select, delete, or create new wheels.
+### 2. Scoped Logic Layer (Hooks)
+* **`useWheels`**: Custom hook encapsulating creation and removal operations for configurations.
+* **`useActiveWheel`**: Coordinates option state modifications. When a spin lands on a choice, this hook reduces remaining heart lives, triggers glass shields cracks, parses mystery shrouds, or replaces depleted options with sub-options.
+* **`useAnimationLoop`**: Manages low-level `requestAnimationFrame` lifecycles. It safely registers draw loops, triggers ticker sounds, and updates frame time changes while preventing React state synchronization lags.
 
-### 3. Settings Configuration Panel (`SettingsModal.jsx`)
-* Allows customization of name, rotation time, option weights, colors, and max life bounds (1-10 or permanent unlimited mode).
-* Supports adding nested sub-option configurations to build cascading replacement chains.
-
-### 4. Wheel Engine (`WheelSpin.jsx`)
-* Contains the game loop using an HTML5 Canvas context.
-* Interacts with math utilities in `wheelAnimationUtils.js` for easing curves and procedural vector pathing.
-* Displays celebration badge alerts (`WinnerModal`) and safety confirmation popups (`ResetConfirmModal`).
+### 3. Display View Components
+* **`WheelView`**: Integrates classic spinner canvas events.
+* **`LootboxView`**: Tickers options horizontally, replicating a CS:GO case opening.
+* **`HorseRaceView`**: Sprints options side-by-side on turf track lanes using relative random speeds.
 
 ---
 
-## ⚡ Data Flow
+## 🎨 Decoupled Canvas Graphic Renderers
+
+To avoid React re-rendering bottlenecks at 60fps, all visual updates occur inside an HTML5 `<canvas>` managed by pure functional renderers in the `src/renderers/` directory:
+
+1. **`wheelRenderer`**: Calculates radian slices, pointer offsets, peg coordinates, and wedge bounds.
+2. **`lootboxRenderer`**: Renders ticker cards, spacing, indicators, and border highlights.
+3. **`horseRaceRenderer`**: Draws dirt racetracks, start fences, finish line flags, and runner lanes.
+4. **`horseRenderer`**: Computes vector shapes for majestic horses, adjusting knee joints, hooves, tail swings, and jockey heights.
+5. **`particleRenderer`**: Handles confetti drops, spark drops, slice cracking patterns, floating unlock badge texts, and collapsing wedge shatter effects.
+
+---
+
+## ⚡ Data Flow Example (Winner & Depletion)
 
 ```mermaid
 sequenceDiagram
   autonumber
   actor User
-  participant App as App.jsx
-  participant Wheel as WheelSpin.jsx
-  participant WinMod as WinnerModal.jsx
+  participant UI as WheelView.jsx
+  participant Hook as useActiveWheel.js
+  participant Context as WheelContext.jsx
+  participant Modal as WinnerModal.jsx
 
-  User->>Wheel: Clicks SPIN!
-  Note over Wheel: Animation loop starts spinning wheel
-  Wheel->>Wheel: Lands on Option
-  Wheel->>Wheel: Open modal state
-  Wheel->>WinMod: Render results
-  User->>WinMod: Clicks "Confirm & Continue"
-  WinMod->>Wheel: Trigger onConfirm() callback
-  Note over Wheel: Close modal, trigger cracking & exploding
-  Note over Wheel: Shard particles burst, slice collapses to 0 weight
-  Wheel->>App: Calls onSpinEnd(winner) React state callback
-  Note over App: Updates localStorage list (decrement life/replace with sub-option)
-  App->>Wheel: Propagates updated options prop
-  Note over Wheel: Starts growth transition (new sub-option scales up from 0 weight)
-  Note over Wheel: Display unlocked floating text pill
+  User->>UI: Clicks "Spin Wheel"
+  Note over UI: useAnimationLoop drives wheel rotation at 60fps
+  UI->>UI: Easing ends, lands on Winner
+  UI->>Modal: Open modal state showing Winner details
+  User->>Modal: Clicks "Confirm Winner"
+  Modal->>Hook: Triggers handleConfirm()
+  Note over Hook: useActiveWheel determines lives, shields, or shrouds changes
+  Hook->>Context: Triggers updateWheelOptions()
+  Note over Context: Saves updated config state to localStorage
+  Context->>UI: Propagates updated options array to canvas
+  Note over UI: Triggers cracking & shattering shard particle animations
 ```
 
 ---
 
-## 🎡 Canvas Physics & Animation Loop
-
-To ensure smooth 60fps animations without React re-render lag, all active physical vectors (angles, velocity, particle arrays, current frame timestamps) are kept out of React state using React `useRef` tokens.
-
-### The `animate()` Loop
-A centralized `requestAnimationFrame` loop handles multiple simultaneous states:
-1. **Spinning Phase**: Adjusts current angle according to a cubic ease-out calculation over the duration. Triggers click sound effects and pointer wiggles on wedge crossings.
-2. **Cracking Phase**: Shakes the wedge vector position and procedurally grows crack paths along the wedge's coordinates.
-3. **Explosion Phase**: Scales down the wedge's weight smoothly to 0 while throwing dozens of rotating polygon shard vectors outward.
-4. **Growth Phase**: Takes the newly inserted option weight (if a sub-option was unlocked) and scales it up from `0` to its full size over 1000ms.
-5. **Floating Banner Pill**: Animates the scale and upward translation of the glassmorphic achievement badge.
-6. **Confetti & Golden Spark Particles**: Updates physical drag, gravity, and opacity decay of visual assets.
+## 🩹 Data Sanitization & Legacy Migration
+The project includes a robust validation mechanism in `src/utils/sanitization.js` that intercepts legacy config imports or obsolete `localStorage` configurations. It automatically backfills missing properties (such as shields, shrouds, and option links) with default values, ensuring older versions do not crash the React context or canvas renderers.
