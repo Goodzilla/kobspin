@@ -604,3 +604,12 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
   z-index: 15;
 }
+
+/* Footer link styles and hover transition */
+.footer-link {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+.footer-link:hover {
+  color: var(--color-accent) !important;
+  opacity: 1 !important;
+}
