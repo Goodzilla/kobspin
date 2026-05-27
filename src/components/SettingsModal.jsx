@@ -521,17 +521,51 @@ export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
               
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" style={{ marginBottom: '8px', fontSize: '0.85rem', fontWeight: 700, letterSpacing: '0.05em' }}>
-                  Spin Duration (sec)
+                  Spin Duration
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="60"
-                  value={spinDuration}
-                  onChange={(e) => setSpinDuration(Math.max(1, Math.min(60, parseInt(e.target.value) || 1)))}
-                  className="form-input"
-                  style={{ fontSize: '1rem', padding: '12px 16px', borderRadius: '10px' }}
-                />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      min="1"
+                      max="60"
+                      value={spinDuration}
+                      onChange={(e) => setSpinDuration(Math.max(1, Math.min(60, parseInt(e.target.value) || 1)))}
+                      className="form-input"
+                      style={{ fontSize: '1rem', padding: '12px 16px', paddingRight: '48px', borderRadius: '10px', width: '100%' }}
+                    />
+                    <span style={{ position: 'absolute', right: '16px', color: 'var(--color-text-muted)', fontSize: '0.85rem', pointerEvents: 'none', userSelect: 'none' }}>sec</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+                    {[10, 20, 30].map((t) => {
+                      const isActive = spinDuration === t;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSpinDuration(t)}
+                          className="btn"
+                          style={{
+                            flex: 1,
+                            padding: '6px 0',
+                            fontSize: '0.8rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            border: isActive ? '1px solid var(--color-accent)' : '1px solid var(--border-glass)',
+                            background: isActive ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                            color: isActive ? '#fff' : 'var(--color-text-secondary)',
+                            fontWeight: isActive ? '700' : 'normal',
+                            transition: 'all 0.2s ease',
+                            outline: 'none',
+                            boxShadow: isActive ? '0 0 8px rgba(139, 92, 246, 0.15)' : 'none'
+                          }}
+                        >
+                          {t}s
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
 
