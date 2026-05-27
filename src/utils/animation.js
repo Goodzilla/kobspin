@@ -1,5 +1,3 @@
-export const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-
 export const generateCracks = (angleSize, radius) => {
   const paths = [];
   const numMainPaths = 3;

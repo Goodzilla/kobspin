@@ -133,7 +133,7 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
           Kob<span style={{ color: 'var(--color-accent)' }}>Spin</span>
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.1rem', marginBottom: '20px', maxWidth: '520px', lineHeight: '1.5' }}>
-          Create custom wheels with nested, unlockable options and variable weights.
+          Create custom wheels with option lives, shields, mystery shrouds, nested unlocks, and three layouts you can swap instantly. It's mostly AI-assisted slop, but it actually works.
         </p>
       </header>
 
@@ -453,47 +453,47 @@ export default function Home({ wheels, onSelectWheel, onCreateWheel, onDeleteWhe
         textAlign: 'left'
       }}>
         <h2 style={{ fontSize: '1.8rem', color: '#fff', marginBottom: '16px' }}>
-          Progressive Spinner Wheel Decider with Nested Unlockable Slices
+          Why did I build this?
         </h2>
-        <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.6', marginBottom: '24px', fontSize: '0.98rem' }}>
-          KobSpin is a free, modern <strong>custom spinner wheel</strong> maker and <strong>random name picker</strong> that introduces progressive gamification. Traditional decision wheels give a single static result. KobSpin allows you to link options, create <strong>nested unlockable layers</strong>, and configure custom slice lives (hearts). When an option runs out of lives, it shatters and unlocks its sub-options dynamically, changing the wheel's layout and odds in real-time!
+        <p style={{ color: 'var(--color-text-secondary)', lineHeight: '1.65', marginBottom: '32px', fontSize: '0.98rem' }}>
+          Let's be real: most decision wheels are boring. You spin once, get your result, and you're done. I wanted something more chaotic, so I built this. KobSpin lets you turn simple choices into a weird progressive game. You can give options lives so they don't disappear immediately, wrap them in glassy shields that crack when hit, hide them under shrouds if you want a surprise, or chain them together so a backup option only appears when the main one runs out of lives. Is it totally overengineered? Yeah. Did I let an AI write a bunch of this CSS and React boilerplate because I was too lazy to do it myself? Absolutely, it's AI slop, but it actually works. Use it on streams, for deciding what to eat, or just to waste time.
         </p>
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '24px'
+          gap: '28px'
         }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-accent)', marginBottom: '8px' }}>
-              🎮 Gamified Decisions
+              ☸️ Three Ways to Spin
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              Use nested options to build fallback rewards, progression paths, or twitch streaming punishment chains (like subathon challenges).
+              Swap layouts instantly: choose the classic <strong>Wheel Spinner</strong>, a CS:GO-style scrolling <strong>Lootbox Container</strong>, or a high-stakes <strong>Horse Race</strong> where your choices sprint to the finish line!
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-info)', marginBottom: '8px' }}>
-              ⚖️ Weighted Odds
+              🛡️ Shields & Shrouds
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              Fine-tune the exact percentage odds for each segment by adjusting weight parameters. Perfect for fair raffle picker giveaways or balanced contest wheels.
+              Put glassy <strong>Shields</strong> on options so they don't lose lives right away, or use a <strong>Shroud</strong> to hide options in mystery fog until they get landed on.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-success)', marginBottom: '8px' }}>
-              📦 Lootbox Case Openers
+              ⛓️ Nested Unlock Chains
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              Enable <strong>Lootbox Variant</strong> mode in Settings to experience a horizontal scrolling container opening simulator (CS:GO style) representing weighted odds.
+              Chain options together. When a main option runs out of lives and shatters, it automatically unlocks its sub-options on the wheel. It's a bit complicated, but it's cool.
             </p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem', color: 'var(--color-accent)', marginBottom: '8px', filter: 'hue-rotate(60deg)' }}>
-              🔒 Save & Embed Offline
+              ⚖️ Weighted Odds
             </h3>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              All custom spinner configurations are automatically saved to browser localStorage, ensuring your data is persisted securely for your next classroom session or stream.
+              Tweak weights to make options super rare or annoyingly common. Everything is saved in your local storage, so reloading the page won't wipe your settings.
             </p>
           </div>
         </div>

@@ -1,6 +1,8 @@
 
 
 import { createPortal } from 'react-dom';
+import ModalOverlay from './ui/ModalOverlay';
+import GlassPanel from './ui/GlassPanel';
 
 export default function WinnerModal({
   isOpen,
@@ -40,22 +42,7 @@ export default function WinnerModal({
   const activeShields = Math.max(0, winner.currentShields - 1);
 
   return createPortal(
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100dvh',
-      backgroundColor: 'rgba(5, 3, 10, 0.82)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 100,
-      padding: '20px',
-      overflowY: 'auto',
-      backdropFilter: 'blur(14px)',
-      WebkitBackdropFilter: 'blur(14px)'
-    }} className="animate-overlay">
+    <ModalOverlay onClose={onConfirm} style={{ backgroundColor: 'rgba(5, 3, 10, 0.82)' }}>
       
       {/* Soft breathing background halo */}
       <div style={{
@@ -70,7 +57,7 @@ export default function WinnerModal({
         animation: 'modalGlowPulse 6s ease-in-out infinite'
       }} />
 
-      <div className="glass-panel animate-scale-in" style={{
+      <GlassPanel animate style={{
         maxWidth: '480px',
         width: '100%',
         padding: '44px 32px',
@@ -608,8 +595,8 @@ export default function WinnerModal({
             Confirm & Continue
           </button>
         </div>
-      </div>
-    </div>,
+      </GlassPanel>
+    </ModalOverlay>,
     document.body
   );
 }

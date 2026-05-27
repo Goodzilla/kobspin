@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { getVibrantColor, generateId } from '../utils';
+import { getVibrantColor } from '../utils/colors';
+import { generateId } from '../utils/ids';
 
 export default function SettingsModal({ wheel, wheels = [], onSave, onClose }) {
   const [wheelName, setWheelName] = useState(wheel.name);

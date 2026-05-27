@@ -1,6 +1,8 @@
 
 
 import { createPortal } from 'react-dom';
+import ModalOverlay from './ui/ModalOverlay';
+import GlassPanel from './ui/GlassPanel';
 
 export default function ResetConfirmModal({
   isOpen,
@@ -10,21 +12,8 @@ export default function ResetConfirmModal({
   if (!isOpen) return null;
 
   return createPortal(
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100dvh',
-      backgroundColor: 'rgba(7, 5, 15, 0.8)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 110,
-      padding: '20px',
-      overflowY: 'auto'
-    }} className="animate-overlay">
-      <div className="glass-panel animate-scale-in" style={{
+    <ModalOverlay onClose={onClose} style={{ backgroundColor: 'rgba(7, 5, 15, 0.8)' }}>
+      <GlassPanel animate style={{
         maxWidth: '400px',
         width: '100%',
         padding: '30px 24px',
@@ -53,8 +42,8 @@ export default function ResetConfirmModal({
             Reset
           </button>
         </div>
-      </div>
-    </div>,
+      </GlassPanel>
+    </ModalOverlay>,
     document.body
   );
 }
