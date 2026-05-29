@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useEffect } from 'react';
 import WinnerModal from './WinnerModal';
 import ResetConfirmModal from './ResetConfirmModal';
 import WheelView from './WheelView';
@@ -89,6 +89,86 @@ export default function WheelSpin({
     onResetWheel();
   };
 
+  const hasCommittedRef = useRef(false);
+
+  const handleViewSpinEnd = (winnerOpt) => {
+    hasCommittedRef.current = true;
+    onSpinEnd(winnerOpt);
+  };
+
+  // Reset commit status when winner changes (e.g. is cleared)
+  useEffect(() => {
+    if (!winner) {
+      hasCommittedRef.current = false;
+    }
+  }, [winner]);
+
+  // Auto-commit winner on unmount/navigation
+  useEffect(() => {
+    const currentWinner = winner;
+    const currentOnSpinEnd = onSpinEnd;
+    return () => {
+      if (currentWinner && !hasCommittedRef.current) {
+        currentOnSpinEnd(currentWinner);
+      }
+    };
+  }, [winner, onSpinEnd]);
+
+  // Auto-commit outcome to localStorage if page is reloaded or tab is closed
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (winner && !hasCommittedRef.current) {
+        try {
+          const saved = localStorage.getItem('wheelspin_wheels');
+          if (saved) {
+            const wheelsList = JSON.parse(saved);
+            if (Array.isArray(wheelsList)) {
+              const updated = wheelsList.map(w => {
+                if (w.id !== wheel.id) return w;
+                
+                const newActive = w.activeOptions.map(opt => {
+                  if (opt.id === winner.id) {
+                    if (opt.currentShrouds > 0) {
+                      return { ...opt, currentShrouds: opt.currentShrouds - 1 };
+                    }
+                    if (opt.currentShields > 0) {
+                      return { ...opt, currentShields: opt.currentShields - 1 };
+                    }
+                    if (opt.lives === 0) {
+                      return opt;
+                    }
+                    if (opt.currentLives > 1) {
+                      return { ...opt, currentLives: opt.currentLives - 1 };
+                    }
+                    if (opt.subOption) {
+                      const nextOpt = { ...opt.subOption };
+                      nextOpt.currentLives = nextOpt.lives;
+                      nextOpt.currentShrouds = nextOpt.shrouds || 0;
+                      nextOpt.currentShields = nextOpt.shields || 0;
+                      return nextOpt;
+                    }
+                    return null;
+                  }
+                  return opt;
+                }).filter(Boolean);
+                
+                return { ...w, activeOptions: newActive };
+              });
+              localStorage.setItem('wheelspin_wheels', JSON.stringify(updated));
+            }
+          }
+        } catch (e) {
+          console.error('Failed to auto-save progress on page unload', e);
+        }
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [winner, wheel]);
+
   // Shared props object passed down to display view components
   const viewProps = {
     ref: viewRef,
@@ -99,7 +179,7 @@ export default function WheelSpin({
     onTransitionToWheel,
     nestedResult,
     onClearNestedResult,
-    onSpinEnd,
+    onSpinEnd: handleViewSpinEnd,
     onBackHome,
     onOpenSettings,
     onResetWheel: handleConfirmReset,

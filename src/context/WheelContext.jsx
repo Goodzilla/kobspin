@@ -87,35 +87,92 @@ export const WheelProvider = ({ children }) => {
       displayMode = displayModeOrIsLootbox;
     }
 
-    const fingerprintOption = (o) => {
-      let fp = `${o.id}:${o.weight}:${o.lives}:${o.shrouds || 0}:${o.shields || 0}`;
-      if (o.subOption) fp += `>(${fingerprintOption(o.subOption)})`;
-      return fp;
+    // Helpers for deep option reconciliation
+    const collectOptionIds = (opts) => {
+      const ids = new Set();
+      const traverse = (o) => {
+        if (!o) return;
+        ids.add(o.id);
+        if (o.subOption) traverse(o.subOption);
+      };
+      opts.forEach(traverse);
+      return ids;
     };
-    const optionFingerprint = (opts) => opts.map(fingerprintOption).join('|');
+
+    const collectActiveOptionsMap = (opts) => {
+      const map = new Map();
+      const traverse = (o) => {
+        if (!o) return;
+        map.set(o.id, o);
+        if (o.subOption) traverse(o.subOption);
+      };
+      opts.forEach(traverse);
+      return map;
+    };
+
+    const cloneAndResetOption = (opt) => {
+      if (!opt) return null;
+      const clone = JSON.parse(JSON.stringify(opt));
+      const reset = (o) => {
+        if (!o) return;
+        o.currentLives = o.lives;
+        o.currentShrouds = o.shrouds || 0;
+        o.currentShields = o.shields || 0;
+        if (o.subOption) reset(o.subOption);
+      };
+      reset(clone);
+      return clone;
+    };
+
+    const reconcileOptions = (newOriginals, oldOriginals, oldActives) => {
+      const oldOrigIds = collectOptionIds(oldOriginals || []);
+      const oldActiveMap = collectActiveOptionsMap(oldActives || []);
+
+      const reconciledList = [];
+
+      for (const newOpt of newOriginals) {
+        let matchedActive = null;
+        let curr = newOpt;
+        while (curr) {
+          if (oldActiveMap.has(curr.id)) {
+            matchedActive = oldActiveMap.get(curr.id);
+            break;
+          }
+          curr = curr.subOption;
+        }
+
+        if (matchedActive) {
+          const livesLost = matchedActive.lives === 0 ? 0 : Math.max(0, matchedActive.lives - matchedActive.currentLives);
+          const shieldsLost = Math.max(0, (matchedActive.shields || 0) - (matchedActive.currentShields || 0));
+          const shroudsLost = Math.max(0, (matchedActive.shrouds || 0) - (matchedActive.currentShrouds || 0));
+
+          const reconciled = {
+            ...curr,
+            currentLives: curr.lives === 0 ? 0 : Math.max(1, curr.lives - livesLost),
+            currentShields: curr.shields === 0 ? 0 : Math.max(0, curr.shields - shieldsLost),
+            currentShrouds: curr.shrouds === 0 ? 0 : Math.max(0, curr.shrouds - shroudsLost),
+            subOption: cloneAndResetOption(curr.subOption)
+          };
+
+          reconciledList.push(reconciled);
+        } else {
+          if (!oldOrigIds.has(newOpt.id)) {
+            reconciledList.push(cloneAndResetOption(newOpt));
+          }
+        }
+      }
+
+      return reconciledList;
+    };
 
     setWheels(prev => prev.map(w => {
       if (w.id !== wheelId) return w;
 
-      const prevFingerprint = optionFingerprint(w.originalOptions || []);
-      const nextFingerprint = optionFingerprint(originalOptions);
-      const optionsChanged = prevFingerprint !== nextFingerprint;
-
-      let newActiveOptions;
-      if (optionsChanged) {
-        const clonedActive = JSON.parse(JSON.stringify(originalOptions));
-        const resetLives = (opt) => {
-          if (!opt) return;
-          opt.currentLives = opt.lives;
-          opt.currentShrouds = opt.shrouds || 0;
-          opt.currentShields = opt.shields || 0;
-          if (opt.subOption) resetLives(opt.subOption);
-        };
-        clonedActive.forEach(resetLives);
-        newActiveOptions = clonedActive;
-      } else {
-        newActiveOptions = w.activeOptions || JSON.parse(JSON.stringify(originalOptions));
-      }
+      const newActiveOptions = reconcileOptions(
+        originalOptions,
+        w.originalOptions,
+        w.activeOptions || []
+      );
 
       return {
         ...w,
