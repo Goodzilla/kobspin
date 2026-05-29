@@ -1,6 +1,6 @@
 # KobSpin
 
-Custom wheels with option lives, shields, mystery shrouds, nested unlocks, and three layouts you can swap instantly. Yes, it's AI-assisted slop, but it actually works.
+Custom wheels with option lives, shields, mystery shrouds, nested unlocks, and three layouts you can swap instantly. It's AI slop, but it works (most of the time).
 
 Most decision wheels give you a simple choice, spin once, and that's it. I wanted something more chaotic, so I built this. KobSpin lets you turn simple choices into a weird progressive game. You can give options lives so they don't disappear immediately, wrap them in glassy shields that crack, hide them under shrouds if you want a surprise, or chain them together so a backup option only appears when the main one runs out of lives.
 
