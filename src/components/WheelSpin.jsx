@@ -103,16 +103,21 @@ export default function WheelSpin({
     }
   }, [winner]);
 
+  const latestSpinStateRef = useRef({ winner, onSpinEnd });
+
+  useEffect(() => {
+    latestSpinStateRef.current = { winner, onSpinEnd };
+  }, [winner, onSpinEnd]);
+
   // Auto-commit winner on unmount/navigation
   useEffect(() => {
-    const currentWinner = winner;
-    const currentOnSpinEnd = onSpinEnd;
     return () => {
+      const { winner: currentWinner, onSpinEnd: currentOnSpinEnd } = latestSpinStateRef.current;
       if (currentWinner && !hasCommittedRef.current) {
         currentOnSpinEnd(currentWinner);
       }
     };
-  }, [winner, onSpinEnd]);
+  }, []);
 
   // Auto-commit outcome to localStorage if page is reloaded or tab is closed
   useEffect(() => {

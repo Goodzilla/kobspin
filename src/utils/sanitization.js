@@ -90,3 +90,23 @@ export const sanitizeWheelsData = (wheelsArray) => {
   if (!Array.isArray(wheelsArray)) return [];
   return wheelsArray.map(sanitizeWheel).filter(Boolean);
 };
+
+/**
+ * Sanitizes the history list by removing duplicates that occur within the same second
+ * and have the exact same reward details (wheel name, option name, and event text).
+ */
+export const sanitizeHistory = (historyList) => {
+  if (!Array.isArray(historyList)) return [];
+  const seen = new Set();
+  return historyList.filter(item => {
+    if (!item) return false;
+    const secondTimestamp = Math.floor(item.timestamp / 1000);
+    // Build a unique key combining the timestamp (to the second) and the reward/event detail properties
+    const key = `${secondTimestamp}|${item.wheelName || ''}|${item.optionName || ''}|${item.eventText || ''}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};

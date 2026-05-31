@@ -1,12 +1,18 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState } from 'react';
+import { sanitizeHistory } from '../utils/sanitization';
 
 export const HistoryContext = createContext(null);
 
 export const HistoryProvider = ({ children }) => {
   const [history, setHistory] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('kobspin_history') || '[]');
+      const raw = JSON.parse(localStorage.getItem('kobspin_history') || '[]');
+      const sanitized = sanitizeHistory(raw);
+      if (sanitized.length !== raw.length) {
+        localStorage.setItem('kobspin_history', JSON.stringify(sanitized));
+      }
+      return sanitized;
     } catch {
       return [];
     }
